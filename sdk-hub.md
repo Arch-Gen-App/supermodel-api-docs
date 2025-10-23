@@ -1,6 +1,8 @@
 ---
+layout: default
 title: SDK Hub
----  
+nav_order: 5
+---
 
 # SDK Hub  
 
@@ -10,4 +12,4 @@ This page links to various SDKs available for interacting with the Supermodel Co
 - **JavaScript SDK** – [Coming soon]  
 - **Go SDK** – [Coming soon]  
 
-More SDKs and guides will be added soon. 
+More SDKs and guides will be added soon.
