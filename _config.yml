@@ -1,4 +1,9 @@
 title: "Supermodel API Docs"  
 description: "Documentation for Supermodel Code Graph API"  
 remote_theme: just-the-docs/just-the-docs  
-nav_enabled: true
+nav_enabled: true  
+nav_fixed: false  
+
+just_the_docs:
+  custom_css:
+    - "/assets/css/custom.css"
