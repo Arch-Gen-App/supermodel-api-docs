@@ -1,6 +1,8 @@
----
-title: Getting Started Guide
----
+---  
+layout: default  
+title: Getting Started Guide  
+nav_order: 2  
+---  
 
 # Getting Started  
 
