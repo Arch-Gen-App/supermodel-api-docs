@@ -1,0 +1,9 @@
+/* Narrow sidebar and anchor to left */
+.side-bar {
+  width: 200px;
+  left: 0;
+}
+
+.main {
+  margin-left: 200px;
+}
