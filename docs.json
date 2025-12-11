@@ -2,7 +2,6 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Supermodel API",
-  "defaultOrigin": "https://supermodeltools.com",
   "colors": {
     "primary": "#48878A",
     "light": "#71B9BC",
