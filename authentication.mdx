@@ -1,0 +1,50 @@
+---
+title: 'Authentication'
+description: 'How to authenticate your API requests'
+icon: 'key'
+---
+
+The Supermodel API uses API keys to authenticate requests. You can view and manage your API keys in the [Supermodel Dashboard](https://staging.dashboard.supermodeltools.com/).
+
+<Info>
+  **Using the API Playground**: The interactive playground in this documentation connects to our staging environment. Generate an API key from the [Staging Dashboard](https://staging.dashboard.supermodeltools.com/) to test endpoints directly from these docs.
+</Info>
+
+## Authentication Header
+
+Authentication to the Data Plane API is performed via the `X-Api-Key` header.
+
+```bash
+X-Api-Key: smsk_live_...
+```
+
+## Idempotency Key
+
+All API requests require an `Idempotency-Key` header. This is a unique value (such as a UUID) that you generate for each request. It serves two purposes:
+
+1. **Safe retries**: If a request fails due to a network issue, you can safely retry it with the same idempotency key without risking duplicate operations.
+2. **Request tracing**: The key is echoed back in the `X-Request-Id` response header for debugging and support purposes.
+
+```bash
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+```
+
+You can generate a UUID in most languages or use command-line tools like `uuidgen`.
+
+## Example Request
+
+Here's how to include the headers in a cURL request:
+
+```bash
+curl --request POST \
+  --url https://staging.api.supermodeltools.com/v1/graphs/dependency \
+  --header "Idempotency-Key: $(uuidgen)" \
+  --header 'X-Api-Key: <your-api-key>' \
+  --header 'Content-Type: multipart/form-data' \
+  --form file='@./repo.zip'
+```
+
+<Warning>
+  Your API keys carry many privileges, so be sure to keep them secure! Do not share your secret API keys in publicly accessible areas such as GitHub, client-side code, and so forth.
+</Warning>
+

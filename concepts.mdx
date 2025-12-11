@@ -1,0 +1,50 @@
+---
+title: 'Core Concepts'
+description: 'Understanding the different types of graphs available'
+icon: 'layer-group'
+---
+
+Supermodel provides different "lenses" to view your codebase through. Each API endpoint generates a specific type of graph suited for different analysis tasks.
+
+## Dependency Graph
+
+**Endpoint:** `/v1/graphs/dependency`
+
+The Dependency Graph maps relationships at the file and module level. It answers questions like "What files import `utils.ts`?" or "What is the dependency structure of this module?".
+
+- **Nodes**: Files, Modules
+- **Edges**: `imports`, `exports`
+
+## Call Graph
+
+**Endpoint:** `/v1/graphs/call`
+
+The Call Graph provides a lower-level view, mapping function calls and class usage. It is essential for understanding execution flow, finding dead code, or tracing the impact of a function change.
+
+- **Nodes**: Functions, Classes, Methods
+- **Edges**: `calls`, `instantiates`, `overrides`
+
+## Domain Graph
+
+**Endpoint:** `/v1/graphs/domain`
+
+The Domain Graph attempts to reverse-engineer the business domains and subdomains from the codebase. It clusters code artifacts into logical groups based on naming conventions, directory structure, and coupling.
+
+- **Nodes**: Domains, Subdomains
+- **Edges**: `dependsOn`, `contains`
+
+## Parse Graph
+
+**Endpoint:** `/v1/graphs/parse`
+
+The Parse Graph exposes the raw Abstract Syntax Tree (AST) relationships. This is the most detailed view, useful for deep static analysis, linter rule creation, or refactoring tools.
+
+- **Nodes**: AST nodes (declarations, identifiers, blocks)
+- **Edges**: `parent`, `child`, `sibling`
+
+## Supermodel Graph
+
+**Endpoint:** `/v1/graphs/supermodel`
+
+The Supermodel Graph is a unified representation that combines layers from all the above. It links the high-level domains down to the low-level AST nodes, providing a complete vertical slice of the system architecture.
+

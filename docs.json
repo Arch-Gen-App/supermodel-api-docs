@@ -1,0 +1,70 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Supermodel API",
+  "defaultOrigin": "https://supermodeltools.com",
+  "colors": {
+    "primary": "#48878A",
+    "light": "#71B9BC",
+    "dark": "#112D30"
+  },
+  "favicon": "/favicon.svg",
+  "css": ["overrides.css"],
+  "api": {
+    "baseUrl": "https://staging.api.supermodeltools.com",
+    "auth": {
+      "method": "key",
+      "name": "X-Api-Key"
+    },
+    "playground": {
+      "mode": "simple",
+      "proxy": true
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "index",
+              "quickstart",
+              "authentication",
+              "concepts"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "openapi": "supermodel-public.yaml"
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:engineers@supermodel.software"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://supermodeltools.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/mintlify",
+      "github": "https://github.com/mintlify",
+      "linkedin": "https://linkedin.com/company/mintlify"
+    }
+  }
+}

@@ -1,0 +1,83 @@
+---
+title: 'Quickstart'
+description: 'Generate your first code graph in minutes'
+icon: 'bolt'
+---
+
+This guide will walk you through generating a **Dependency Graph** from a local repository.
+
+## Prerequisites
+
+1. **API Key**: You'll need a Supermodel API key. Get one from the [Dashboard](https://staging.dashboard.supermodeltools.com/).
+2. **Codebase**: A local folder containing the code you want to analyze.
+3. **Tools**: `zip` and `curl` installed on your machine.
+
+## Step 1: Prepare your code
+
+The Supermodel API accepts code as a zipped archive. Navigate to your project folder and create a zip file, excluding hidden files like `.git` or `node_modules` to keep the upload size small.
+
+```bash
+# Zip your current directory, excluding hidden files and node_modules
+zip -r repo.zip . -x ".*" -x "**/.*" -x "node_modules/*"
+```
+
+## Step 2: Generate a graph
+
+Use the `dependency` endpoint to generate a graph of file-level dependencies. Replace `<your-api-key>` with your actual key. The `Idempotency-Key` should be a unique value (like a UUID) for each request.
+
+```bash
+curl --request POST \
+  --url https://staging.api.supermodeltools.com/v1/graphs/dependency \
+  --header "Idempotency-Key: $(uuidgen)" \
+  --header 'X-Api-Key: <your-api-key>' \
+  --header 'Content-Type: multipart/form-data' \
+  --form file='@repo.zip'
+```
+
+<Tip>
+  The `$(uuidgen)` command generates a unique ID automatically on macOS and Linux. On Windows, you can use `[guid]::NewGuid()` in PowerShell.
+</Tip>
+
+## Step 3: Interpret the response
+
+You will receive a JSON response containing the graph nodes (files) and relationships (imports).
+
+```json
+{
+  "graph": {
+    "nodes": [
+      {
+        "id": "src/main.ts",
+        "labels": ["File"],
+        "properties": { "name": "main.ts" }
+      },
+      {
+        "id": "src/utils.ts",
+        "labels": ["File"],
+        "properties": { "name": "utils.ts" }
+      }
+    ],
+    "relationships": [
+      {
+        "type": "imports",
+        "startNode": "src/main.ts",
+        "endNode": "src/utils.ts"
+      }
+    ]
+  }
+}
+```
+
+## Next Steps
+
+Explore other graph types to get different insights into your code:
+
+<CardGroup cols={2}>
+  <Card title="Call Graph" icon="diagram-project" href="/api-reference/data-plane/call-graph">
+    Map function-level calls and execution flow.
+  </Card>
+  <Card title="Domain Graph" icon="sitemap" href="/api-reference/data-plane/domain-graph">
+    Identify high-level business domains and boundaries.
+  </Card>
+</CardGroup>
+
