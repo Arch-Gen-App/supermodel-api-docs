@@ -16,8 +16,8 @@
       "name": "X-Api-Key"
     },
     "playground": {
-      "mode": "simple",
-      "proxy": false
+      "mode": "interactive",
+      "proxy": true
     }
   },
   "navigation": {
