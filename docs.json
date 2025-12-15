@@ -38,7 +38,7 @@
       },
       {
         "tab": "API Reference",
-        "openapi": "supermodel-public.yaml"
+        "openapi": "https://api.supermodeltools.com/supermodel-public.yaml"
       }
     ]
   },
