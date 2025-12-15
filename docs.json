@@ -10,7 +10,7 @@
   "favicon": "/favicon.svg",
   "css": ["overrides.css"],
   "api": {
-    "baseUrl": "https://staging.api.supermodeltools.com",
+    "baseUrl": "https://api.supermodeltools.com",
     "auth": {
       "method": "key",
       "name": "X-Api-Key"
