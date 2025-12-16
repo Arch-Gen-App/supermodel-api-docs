@@ -17,7 +17,7 @@
     },
     "playground": {
       "mode": "interactive",
-      "proxy": true
+      "proxy": false
     }
   },
   "navigation": {
