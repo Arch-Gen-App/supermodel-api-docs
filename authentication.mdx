@@ -4,10 +4,10 @@ description: 'How to authenticate your API requests'
 icon: 'key'
 ---
 
-The Supermodel API uses API keys to authenticate requests. You can view and manage your API keys in the [Supermodel Dashboard](https://staging.dashboard.supermodeltools.com/).
+The Supermodel API uses API keys to authenticate requests. You can view and manage your API keys in the [Supermodel Dashboard](https://dashboard.supermodeltools.com/).
 
 <Info>
-  **Using the API Playground**: The interactive playground in this documentation connects to our staging environment. Generate an API key from the [Staging Dashboard](https://staging.dashboard.supermodeltools.com/) to test endpoints directly from these docs.
+  **Using the API Playground**: The interactive playground in this documentation connects to our production API. Generate an API key from the [Supermodel Dashboard](https://dashboard.supermodeltools.com/) to test endpoints directly from these docs.
 </Info>
 
 ## Authentication Header
@@ -37,7 +37,7 @@ Here's how to include the headers in a cURL request:
 
 ```bash
 curl --request POST \
-  --url https://staging.api.supermodeltools.com/v1/graphs/dependency \
+  --url https://api.supermodeltools.com/v1/graphs/dependency \
   --header "Idempotency-Key: $(uuidgen)" \
   --header 'X-Api-Key: <your-api-key>' \
   --header 'Content-Type: multipart/form-data' \

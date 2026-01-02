@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate docs.json is valid JSON
+        run: jq . docs.json > /dev/null
+
+      - name: Disallow staging URLs in docs
+        run: |
+          if rg -n "staging\\." .; then
+            echo "Found staging URLs. Use production URLs or document/allow staging explicitly."
+            exit 1
+          fi
+
+      - name: Link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,201,202,203,204,206,301,302,303,307,308,429
+            --exclude-mail
+            --max-concurrency 8
+            --timeout 20
+            README.md **/*.mdx

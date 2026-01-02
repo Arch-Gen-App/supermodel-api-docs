@@ -1,43 +1,47 @@
-# Mintlify Starter Kit
+# Supermodel API Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+Source for the Supermodel API docs site: [docs.supermodeltools.com](https://docs.supermodeltools.com).
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Get an API key
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+Get your API key from the [Supermodel Dashboard](https://dashboard.supermodeltools.com/) and send it in the `X-Api-Key` header.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+## Quickstart
 
-## Development
+- **Docs**: [docs.supermodeltools.com](https://docs.supermodeltools.com)
+- **OpenAPI spec (canonical)**: [`supermodeltools/openapi-spec`](https://github.com/supermodeltools/openapi-spec) (`openapi.yaml`)
+- **TypeScript SDK**: [`supermodeltools/typescript-sdk`](https://github.com/supermodeltools/typescript-sdk)
+- **MCP Server**: [`supermodeltools/mcp`](https://github.com/supermodeltools/mcp)
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+## Updating docs and API reference
 
-```
+- **Pages**: edit the MDX files in the repo root (`index.mdx`, `quickstart.mdx`, `authentication.mdx`, `concepts.mdx`).
+- **API Reference**: this site is driven by the public OpenAPI spec in [`supermodeltools/openapi-spec`](https://github.com/supermodeltools/openapi-spec).
+
+## Accuracy policy
+
+- **Production-first**: examples should target `https://api.supermodeltools.com` and the Dashboard at [dashboard.supermodeltools.com](https://dashboard.supermodeltools.com/).
+- **Spec mismatch?** If the API behavior differs from the spec, file an issue on [`supermodeltools/openapi-spec`](https://github.com/supermodeltools/openapi-spec).
+- **Docs issue?** File an issue on this repo.
+
+## Support
+
+- **Email**: `mailto:engineers@supermodel.software`
+
+## Local development (docs repo only)
+
+These instructions are only for previewing changes to `supermodel-api-docs` locally.
+
+Install the `mint` CLI:
+
+```bash
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Run the dev server from this repo root (where `docs.json` lives):
 
-```
+```bash
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
-
-## Publishing changes
-
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
-
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+Preview at `http://localhost:3000`.

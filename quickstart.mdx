@@ -8,7 +8,7 @@ This guide will walk you through generating a **Dependency Graph** from a local 
 
 ## Prerequisites
 
-1. **API Key**: You'll need a Supermodel API key. Get one from the [Dashboard](https://staging.dashboard.supermodeltools.com/).
+1. **API Key**: You'll need a Supermodel API key. Get one from the [Dashboard](https://dashboard.supermodeltools.com/).
 2. **Codebase**: A local folder containing the code you want to analyze.
 3. **Tools**: `zip` and `curl` installed on your machine.
 
@@ -27,7 +27,7 @@ Use the `dependency` endpoint to generate a graph of file-level dependencies. Re
 
 ```bash
 curl --request POST \
-  --url https://staging.api.supermodeltools.com/v1/graphs/dependency \
+  --url https://api.supermodeltools.com/v1/graphs/dependency \
   --header "Idempotency-Key: $(uuidgen)" \
   --header 'X-Api-Key: <your-api-key>' \
   --header 'Content-Type: multipart/form-data' \
