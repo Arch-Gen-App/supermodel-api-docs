@@ -9,6 +9,33 @@ html.dark, body.dark, .dark {
   --tw-ring-offset-color: #000000 !important;
 }
 
+.dark .bg-background-dark {
+  background-color: #000000 !important;
+}
+
+.dark .bg-background-light {
+  background-color: #000000 !important;
+}
+
+.dark main {
+  background-color: #000000 !important;
+}
+
+.dark nav, .dark aside {
+  background-color: #000000 !important;
+  border-right-color: #1F1F1F !important;
+}
+:root {
+  --bg-dark: #000000 !important;
+  --bg-default: #000000 !important;
+  --bg-background-dark: #000000 !important;
+}
+
+html.dark, body.dark, .dark {
+  background-color: #000000 !important;
+  --tw-ring-offset-color: #000000 !important;
+}
+
 /* Force black on all major layout containers */
 .dark .bg-background-dark {
   background-color: #000000 !important;
@@ -106,13 +133,3 @@ html.dark, body.dark, .dark {
   background-color: #000000 !important;
 }
 
-/* NUKE UNWANTED GLOBAL LINKS */
-a[href^="https://mintlify.com/docs"],
-a[href^="https://mintlify.com/blog"] {
-  display: none !important;
-}
-
-li:has(a[href^="https://mintlify.com/docs"]),
-li:has(a[href^="https://mintlify.com/blog"]) {
-  display: none !important;
-}
