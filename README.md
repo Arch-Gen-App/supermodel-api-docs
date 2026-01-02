@@ -26,7 +26,7 @@ Get your API key from the [Supermodel Dashboard](https://dashboard.supermodeltoo
 
 ## Support
 
-- **Email**: `mailto:engineers@supermodel.software`
+- **Email**: [engineers@supermodel.software](mailto:engineers@supermodel.software)
 
 ## Local development (docs repo only)
 
