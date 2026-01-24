@@ -6,6 +6,8 @@ icon: 'layer-group'
 
 Supermodel provides different "lenses" to view your codebase through. Each API endpoint generates a specific type of graph suited for different analysis tasks.
 
+All graph generation is **asynchronous** — the API accepts your request, processes it in the background, and you poll for results. See [Async Polling](/async-polling) for details.
+
 ## Dependency Graph
 
 **Endpoint:** `/v1/graphs/dependency`

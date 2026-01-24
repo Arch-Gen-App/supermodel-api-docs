@@ -30,6 +30,7 @@
               "index",
               "quickstart",
               "authentication",
+              "async-polling",
               "concepts"
             ]
           }

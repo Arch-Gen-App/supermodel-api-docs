@@ -20,10 +20,11 @@ X-Api-Key: smsk_live_...
 
 ## Idempotency Key
 
-All API requests require an `Idempotency-Key` header. This is a unique value (such as a UUID) that you generate for each request. It serves two purposes:
+All API requests require an `Idempotency-Key` header. This is a unique value (such as a UUID) that you generate for each request. It serves three purposes:
 
-1. **Safe retries**: If a request fails due to a network issue, you can safely retry it with the same idempotency key without risking duplicate operations.
-2. **Request tracing**: The key is echoed back in the `X-Request-Id` response header for debugging and support purposes.
+1. **Job identity**: The key identifies your graph generation job. Re-submitting the same key returns the existing job status rather than creating a duplicate.
+2. **Polling**: You poll for results by re-submitting the same request with the same idempotency key. See [Async Polling](/async-polling) for details.
+3. **Request tracing**: The key is echoed back in the `X-Request-Id` response header for debugging and support purposes.
 
 ```bash
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000

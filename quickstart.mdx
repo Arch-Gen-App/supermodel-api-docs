@@ -21,52 +21,84 @@ The Supermodel API accepts code as a zipped archive. Navigate to your project fo
 zip -r repo.zip . -x ".*" -x "**/.*" -x "node_modules/*"
 ```
 
-## Step 2: Generate a graph
+## Step 2: Submit a graph generation job
 
-Use the `dependency` endpoint to generate a graph of file-level dependencies. Replace `<your-api-key>` with your actual key. The `Idempotency-Key` should be a unique value (like a UUID) for each request.
+Use the `dependency` endpoint to submit a graph generation job. Replace `<your-api-key>` with your actual key. The `Idempotency-Key` should be a unique value (like a UUID) for each request.
 
 ```bash
+IDEMPOTENCY_KEY=$(uuidgen)
+
 curl --request POST \
   --url https://api.supermodeltools.com/v1/graphs/dependency \
-  --header "Idempotency-Key: $(uuidgen)" \
+  --header "Idempotency-Key: $IDEMPOTENCY_KEY" \
   --header 'X-Api-Key: <your-api-key>' \
   --header 'Content-Type: multipart/form-data' \
   --form file='@repo.zip'
+```
+
+The API returns an **HTTP 202 Accepted** response with the job status:
+
+```json
+{
+  "status": "pending",
+  "jobId": "550e8400-e29b-41d4-a716-446655440000",
+  "retryAfter": 10
+}
 ```
 
 <Tip>
   The `$(uuidgen)` command generates a unique ID automatically on macOS and Linux. On Windows, you can use `[guid]::NewGuid()` in PowerShell.
 </Tip>
 
-## Step 3: Interpret the response
+## Step 3: Poll for results
 
-You will receive a JSON response containing the graph nodes (files) and relationships (imports).
+Graph generation is asynchronous. Poll by re-submitting the same request with the **same Idempotency-Key** until the job completes:
+
+```bash
+# Re-submit the same request to check job status
+curl --request POST \
+  --url https://api.supermodeltools.com/v1/graphs/dependency \
+  --header "Idempotency-Key: $IDEMPOTENCY_KEY" \
+  --header 'X-Api-Key: <your-api-key>' \
+  --header 'Content-Type: multipart/form-data' \
+  --form file='@repo.zip'
+```
+
+When the job completes, you receive an **HTTP 200** response with the graph inside the `result` field:
 
 ```json
 {
-  "graph": {
-    "nodes": [
-      {
-        "id": "src/main.ts",
-        "labels": ["File"],
-        "properties": { "name": "main.ts" }
-      },
-      {
-        "id": "src/utils.ts",
-        "labels": ["File"],
-        "properties": { "name": "utils.ts" }
-      }
-    ],
-    "relationships": [
-      {
-        "type": "imports",
-        "startNode": "src/main.ts",
-        "endNode": "src/utils.ts"
-      }
-    ]
+  "status": "completed",
+  "jobId": "550e8400-e29b-41d4-a716-446655440000",
+  "result": {
+    "graph": {
+      "nodes": [
+        {
+          "id": "src/main.ts",
+          "labels": ["File"],
+          "properties": { "name": "main.ts" }
+        },
+        {
+          "id": "src/utils.ts",
+          "labels": ["File"],
+          "properties": { "name": "utils.ts" }
+        }
+      ],
+      "relationships": [
+        {
+          "type": "imports",
+          "startNode": "src/main.ts",
+          "endNode": "src/utils.ts"
+        }
+      ]
+    }
   }
 }
 ```
+
+<Info>
+  **Using the SDK?** The `@supermodeltools/sdk` package handles polling automatically. See the [Async Polling](/async-polling) guide for details.
+</Info>
 
 ## Next Steps
 
