@@ -14,10 +14,10 @@ sequenceDiagram
     participant API
 
     Client->>API: POST /v1/graphs/dependency (file + Idempotency-Key)
-    API-->>Client: 202 Accepted {status: "processing", retryAfter: 5}
+    API-->>Client: 202 Accepted {status: "pending", retryAfter: 10}
     Note over Client: Wait retryAfter seconds
     Client->>API: POST /v1/graphs/dependency (same file + same key)
-    API-->>Client: 202 Accepted {status: "processing", retryAfter: 5}
+    API-->>Client: 202 Accepted {status: "processing", retryAfter: 10}
     Note over Client: Wait retryAfter seconds
     Client->>API: POST /v1/graphs/dependency (same file + same key)
     API-->>Client: 200 OK {status: "completed", result: {graph: {...}}}
