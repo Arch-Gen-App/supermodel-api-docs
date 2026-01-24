@@ -114,8 +114,10 @@ console.log(result.graph.nodes);
 ### Configuring Polling Behavior
 
 ```typescript
+const controller = new AbortController();
+
 const client = new SupermodelClient(api, {
-  timeoutMs: 600000,             // Max wait time (default: 5 minutes)
+  timeoutMs: 600000,             // Max wait time: 10 minutes (default: 5 minutes)
   defaultRetryIntervalMs: 3000,  // Poll interval if server doesn't specify (default: 5s)
   maxPollingAttempts: 120,       // Max number of polls (default: 60)
   onPollingProgress: (progress) => {
@@ -123,6 +125,9 @@ const client = new SupermodelClient(api, {
   },
   signal: controller.signal,     // AbortSignal for cancellation
 });
+
+// To cancel polling at any point:
+// controller.abort();
 ```
 
 ### Available Methods
