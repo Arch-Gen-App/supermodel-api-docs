@@ -38,7 +38,7 @@
       },
       {
         "tab": "API Reference",
-        "openapi": "https://raw.githubusercontent.com/supermodeltools/openapi-spec/main/openapi.yaml"
+        "openapi": "/openapi.yaml"
       }
     ]
   },

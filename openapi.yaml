@@ -1,0 +1,3825 @@
+openapi: 3.0.0
+info:
+  title: Supermodel
+  description: Code Graphing & Analysis API
+  version: 0.9.6
+  license:
+    name: Supermodel API Terms of Service
+    url: https://supermodeltools.com/legal/api-terms
+servers:
+  - url: https://api.supermodeltools.com
+    description: Production server
+tags:
+  - name: Data Plane
+    description: Calls the data plane to retrieve Supermodel analysis artifacts derived from repositories.
+paths:
+  /v1/graphs/dependency:
+    post:
+      tags:
+        - Data Plane
+      summary: Dependency graph
+      description: Upload a zipped repository snapshot to generate the dependency graph.
+      operationId: generateDependencyGraph
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/graphs/dependency' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+        - lang: javascript
+          label: JavaScript (fetch)
+          source: |
+            import { readFile } from 'node:fs/promises';
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const form = new FormData();
+            form.append('file', new Blob([buffer], { type: 'application/zip' }), 'repo-snapshot.zip');
+
+            const res = await fetch(`${baseUrl}/v1/graphs/dependency`, {
+              method: 'POST',
+              headers: {
+                'Idempotency-Key': idempotencyKey,
+                'X-Api-Key': apiKey
+              },
+              body: form
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            console.log(await res.json());
+        - lang: typescript
+          label: TypeScript (SDK)
+          source: |
+            import { Configuration, DefaultApi } from '@supermodel/public-api-typescript';
+            import { readFile } from 'node:fs/promises';
+
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const archiveBlob = new Blob([buffer], { type: 'application/zip' });
+
+            const configuration = new Configuration({ basePath: baseUrl });
+
+            const apiKeyOverride = async ({ init }) => ({
+              headers: { ...(init.headers ?? {}), 'X-Api-Key': apiKey }
+            });
+
+            const api = new DefaultApi(configuration);
+            const result = await api.generateDependencyGraph(
+              { idempotencyKey, file: archiveBlob },
+              apiKeyOverride
+            );
+
+            console.log(result);
+        - lang: java
+          label: Java (generated client)
+          source: |
+            import org.openapitools.client.ApiClient;
+            import org.openapitools.client.api.DefaultApi;
+
+            import java.io.File;
+
+            public class Example {
+              public static void main(String[] args) throws Exception {
+                String baseUrl = System.getenv().getOrDefault("API_BASE_URL", "https://api.supermodeltools.com");
+                String apiKey = "<api-key>";
+                String idempotencyKey = "<idempotency-key>";
+                File archive = new File("/path/to/your/repo-snapshot.zip");
+
+                ApiClient client = new ApiClient();
+                client.updateBaseUri(baseUrl);
+                client.setRequestInterceptor(rb -> {
+                  rb.header("X-Api-Key", apiKey);
+                });
+
+                DefaultApi api = new DefaultApi(client);
+                api.generateDependencyGraph(idempotencyKey, archive);
+              }
+            }
+        - lang: python
+          label: Python (generated client)
+          source: |
+            import os
+            from supermodel_public_api import ApiClient, Configuration
+            from supermodel_public_api.api.default_api import DefaultApi
+
+            base_url = os.environ.get("API_BASE_URL", "https://api.supermodeltools.com")
+            api_key = "<api-key>"
+            idempotency_key = "<idempotency-key>"
+
+            configuration = Configuration(host=base_url)
+            configuration.api_key["ApiKeyAuth"] = api_key
+
+            api_client = ApiClient(configuration)
+            api = DefaultApi(api_client)
+
+            with open("/path/to/your/repo-snapshot.zip", "rb") as f:
+              payload = f.read()
+
+            result = api.generate_dependency_graph(idempotency_key, file=payload)
+            print(result)
+        - lang: rust
+          label: Rust (reqwest)
+          source: |
+            use bytes::Bytes;
+            use reqwest::multipart::{Form, Part};
+
+            #[tokio::main]
+            async fn main() -> anyhow::Result<()> {
+              let base_url = std::env::var("API_BASE_URL")
+                .unwrap_or_else(|_| "https://api.supermodeltools.com".to_string());
+              let api_key = "<api-key>";
+              let idempotency_key = "<idempotency-key>";
+
+              let archive_bytes = Bytes::from(tokio::fs::read("/path/to/your/repo-snapshot.zip").await?);
+              let url = format!("{}/v1/graphs/dependency", base_url.trim_end_matches('/'));
+
+              let file_part = Part::bytes(archive_bytes.to_vec())
+                .file_name("repo.zip")
+                .mime_str("application/zip")?;
+              let form = Form::new().part("file", file_part);
+
+              let response = reqwest::Client::new()
+                .post(url)
+                .header("Idempotency-Key", idempotency_key)
+                .header("X-Api-Key", api_key)
+                .multipart(form)
+                .send()
+                .await?;
+              let status = response.status();
+              let body = response.bytes().await?;
+
+              if status.is_success() {
+                println!("{}", String::from_utf8_lossy(&body));
+              } else {
+                anyhow::bail!(
+                  "Request failed ({}): {}",
+                  status.as_u16(),
+                  String::from_utf8_lossy(&body)
+                );
+              }
+
+              Ok(())
+            }
+      responses:
+        '200':
+          description: Dependency graph (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  generatedAt: '2025-02-05 15:42:10.000000000 Z'
+                  message: Graph generated successfully
+                  stats:
+                    filesProcessed: 2
+                    classes: 0
+                    functions: 0
+                    types: 0
+                    processingTimeMs: 15
+                  graph:
+                    nodes:
+                      - id: src/main.js
+                        labels:
+                          - File
+                        properties:
+                          path: src/main.js
+                          name: main.js
+                      - id: src/math.js
+                        labels:
+                          - File
+                        properties:
+                          path: src/math.js
+                          name: math.js
+                    relationships:
+                      - id: src/main.js_imports_src/math.js
+                        type: imports
+                        startNode: src/main.js
+                        endNode: src/math.js
+                        properties: {}
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/graphs/call:
+    post:
+      tags:
+        - Data Plane
+      summary: Call graph
+      description: Upload a zipped repository snapshot to generate the function-level call graph.
+      operationId: generateCallGraph
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/graphs/call' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+        - lang: javascript
+          label: JavaScript (fetch)
+          source: |
+            import { readFile } from 'node:fs/promises';
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const form = new FormData();
+            form.append('file', new Blob([buffer], { type: 'application/zip' }), 'repo-snapshot.zip');
+
+            const res = await fetch(`${baseUrl}/v1/graphs/call`, {
+              method: 'POST',
+              headers: {
+                'Idempotency-Key': idempotencyKey,
+                'X-Api-Key': apiKey
+              },
+              body: form
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            console.log(await res.json());
+        - lang: typescript
+          label: TypeScript (SDK)
+          source: |
+            import { Configuration, DefaultApi } from '@supermodel/public-api-typescript';
+            import { readFile } from 'node:fs/promises';
+
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const archiveBlob = new Blob([buffer], { type: 'application/zip' });
+
+            const configuration = new Configuration({ basePath: baseUrl });
+
+            const apiKeyOverride = async ({ init }) => ({
+              headers: { ...(init.headers ?? {}), 'X-Api-Key': apiKey }
+            });
+
+            const api = new DefaultApi(configuration);
+            const result = await api.generateCallGraph(
+              { idempotencyKey, file: archiveBlob },
+              apiKeyOverride
+            );
+
+            console.log(result);
+        - lang: java
+          label: Java (generated client)
+          source: |
+            import org.openapitools.client.ApiClient;
+            import org.openapitools.client.api.DefaultApi;
+
+            import java.io.File;
+
+            public class Example {
+              public static void main(String[] args) throws Exception {
+                String baseUrl = System.getenv().getOrDefault("API_BASE_URL", "https://api.supermodeltools.com");
+                String apiKey = "<api-key>";
+                String idempotencyKey = "<idempotency-key>";
+                File archive = new File("/path/to/your/repo-snapshot.zip");
+
+                ApiClient client = new ApiClient();
+                client.updateBaseUri(baseUrl);
+                client.setRequestInterceptor(rb -> {
+                  rb.header("X-Api-Key", apiKey);
+                });
+
+                DefaultApi api = new DefaultApi(client);
+                api.generateCallGraph(idempotencyKey, archive);
+              }
+            }
+        - lang: python
+          label: Python (generated client)
+          source: |
+            import os
+            from supermodel_public_api import ApiClient, Configuration
+            from supermodel_public_api.api.default_api import DefaultApi
+
+            base_url = os.environ.get("API_BASE_URL", "https://api.supermodeltools.com")
+            api_key = "<api-key>"
+            idempotency_key = "<idempotency-key>"
+
+            configuration = Configuration(host=base_url)
+            configuration.api_key["ApiKeyAuth"] = api_key
+
+            api_client = ApiClient(configuration)
+            api = DefaultApi(api_client)
+
+            with open("/path/to/your/repo-snapshot.zip", "rb") as f:
+              payload = f.read()
+
+            result = api.generate_call_graph(idempotency_key, file=payload)
+            print(result)
+        - lang: rust
+          label: Rust (reqwest)
+          source: |
+            use bytes::Bytes;
+            use reqwest::multipart::{Form, Part};
+
+            #[tokio::main]
+            async fn main() -> anyhow::Result<()> {
+              let base_url = std::env::var("API_BASE_URL")
+                .unwrap_or_else(|_| "https://api.supermodeltools.com".to_string());
+              let api_key = "<api-key>";
+              let idempotency_key = "<idempotency-key>";
+
+              let archive_bytes = Bytes::from(tokio::fs::read("/path/to/your/repo-snapshot.zip").await?);
+              let url = format!("{}/v1/graphs/call", base_url.trim_end_matches('/'));
+
+              let file_part = Part::bytes(archive_bytes.to_vec())
+                .file_name("repo.zip")
+                .mime_str("application/zip")?;
+              let form = Form::new().part("file", file_part);
+
+              let response = reqwest::Client::new()
+                .post(url)
+                .header("Idempotency-Key", idempotency_key)
+                .header("X-Api-Key", api_key)
+                .multipart(form)
+                .send()
+                .await?;
+              let status = response.status();
+              let body = response.bytes().await?;
+
+              if status.is_success() {
+                println!("{}", String::from_utf8_lossy(&body));
+              } else {
+                anyhow::bail!(
+                  "Request failed ({}): {}",
+                  status.as_u16(),
+                  String::from_utf8_lossy(&body)
+                );
+              }
+
+              Ok(())
+            }
+      responses:
+        '200':
+          description: Call graph (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  generatedAt: '2025-02-05 15:42:10.000000000 Z'
+                  message: Call graph generated successfully
+                  stats:
+                    filesProcessed: 2
+                    classes: 0
+                    functions: 2
+                    types: 0
+                    processingTimeMs: 8
+                  graph:
+                    nodes:
+                      - id: fn:index.ts:init
+                        labels:
+                          - Function
+                        properties:
+                          file: src/index.ts
+                      - id: fn:service.ts:handle
+                        labels:
+                          - Function
+                        properties:
+                          file: src/service.ts
+                    relationships:
+                      - id: fn:index.ts:init_calls_fn:service.ts:handle
+                        type: calls
+                        startNode: fn:index.ts:init
+                        endNode: fn:service.ts:handle
+                        properties:
+                          count: 4
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/graphs/domain:
+    post:
+      tags:
+        - Data Plane
+      summary: Domain graph
+      description: Upload a zipped repository snapshot to generate the domain model graph.
+      operationId: generateDomainGraph
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/graphs/domain' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+        - lang: javascript
+          label: JavaScript (fetch)
+          source: |
+            import { readFile } from 'node:fs/promises';
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const form = new FormData();
+            form.append('file', new Blob([buffer], { type: 'application/zip' }), 'repo-snapshot.zip');
+
+            const res = await fetch(`${baseUrl}/v1/graphs/domain`, {
+              method: 'POST',
+              headers: {
+                'Idempotency-Key': idempotencyKey,
+                'X-Api-Key': apiKey
+              },
+              body: form
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            console.log(await res.json());
+        - lang: typescript
+          label: TypeScript (SDK)
+          source: |
+            import { Configuration, DefaultApi } from '@supermodel/public-api-typescript';
+            import { readFile } from 'node:fs/promises';
+
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const archiveBlob = new Blob([buffer], { type: 'application/zip' });
+
+            const configuration = new Configuration({ basePath: baseUrl });
+
+            const apiKeyOverride = async ({ init }) => ({
+              headers: { ...(init.headers ?? {}), 'X-Api-Key': apiKey }
+            });
+
+            const api = new DefaultApi(configuration);
+            const result = await api.generateDomainGraph(
+              { idempotencyKey, file: archiveBlob },
+              apiKeyOverride
+            );
+
+            console.log(result);
+        - lang: java
+          label: Java (generated client)
+          source: |
+            import org.openapitools.client.ApiClient;
+            import org.openapitools.client.api.DefaultApi;
+
+            import java.io.File;
+
+            public class Example {
+              public static void main(String[] args) throws Exception {
+                String baseUrl = System.getenv().getOrDefault("API_BASE_URL", "https://api.supermodeltools.com");
+                String apiKey = "<api-key>";
+                String idempotencyKey = "<idempotency-key>";
+                File archive = new File("/path/to/your/repo-snapshot.zip");
+
+                ApiClient client = new ApiClient();
+                client.updateBaseUri(baseUrl);
+                client.setRequestInterceptor(rb -> {
+                  rb.header("X-Api-Key", apiKey);
+                });
+
+                DefaultApi api = new DefaultApi(client);
+                api.generateDomainGraph(idempotencyKey, archive);
+              }
+            }
+        - lang: python
+          label: Python (generated client)
+          source: |
+            import os
+            from supermodel_public_api import ApiClient, Configuration
+            from supermodel_public_api.api.default_api import DefaultApi
+
+            base_url = os.environ.get("API_BASE_URL", "https://api.supermodeltools.com")
+            api_key = "<api-key>"
+            idempotency_key = "<idempotency-key>"
+
+            configuration = Configuration(host=base_url)
+            configuration.api_key["ApiKeyAuth"] = api_key
+
+            api_client = ApiClient(configuration)
+            api = DefaultApi(api_client)
+
+            with open("/path/to/your/repo-snapshot.zip", "rb") as f:
+              payload = f.read()
+
+            result = api.generate_domain_graph(idempotency_key, file=payload)
+            print(result)
+        - lang: rust
+          label: Rust (reqwest)
+          source: |
+            use bytes::Bytes;
+            use reqwest::multipart::{Form, Part};
+
+            #[tokio::main]
+            async fn main() -> anyhow::Result<()> {
+              let base_url = std::env::var("API_BASE_URL")
+                .unwrap_or_else(|_| "https://api.supermodeltools.com".to_string());
+              let api_key = "<api-key>";
+              let idempotency_key = "<idempotency-key>";
+
+              let archive_bytes = Bytes::from(tokio::fs::read("/path/to/your/repo-snapshot.zip").await?);
+              let url = format!("{}/v1/graphs/domain", base_url.trim_end_matches('/'));
+
+              let file_part = Part::bytes(archive_bytes.to_vec())
+                .file_name("repo.zip")
+                .mime_str("application/zip")?;
+              let form = Form::new().part("file", file_part);
+
+              let response = reqwest::Client::new()
+                .post(url)
+                .header("Idempotency-Key", idempotency_key)
+                .header("X-Api-Key", api_key)
+                .multipart(form)
+                .send()
+                .await?;
+              let status = response.status();
+              let body = response.bytes().await?;
+
+              if status.is_success() {
+                println!("{}", String::from_utf8_lossy(&body));
+              } else {
+                anyhow::bail!(
+                  "Request failed ({}): {}",
+                  status.as_u16(),
+                  String::from_utf8_lossy(&body)
+                );
+              }
+
+              Ok(())
+            }
+      responses:
+        '200':
+          description: Domain graph (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainClassificationResponseAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  runId: smart-sampling-a1b2c3d4
+                  graph:
+                    nodes:
+                      - id: domain:BillingAccount
+                        labels:
+                          - Domain
+                        properties:
+                          name: BillingAccount
+                          description: Handles billing and account management
+                      - id: subdomain:BillingAccount:PaymentProcessing
+                        labels:
+                          - Subdomain
+                        properties:
+                          name: PaymentProcessing
+                          description: Processes payment transactions
+                    relationships:
+                      - id: domain:BillingAccount->contains->subdomain:BillingAccount:PaymentProcessing
+                        type: contains
+                        startNode: domain:BillingAccount
+                        endNode: subdomain:BillingAccount:PaymentProcessing
+                        properties: {}
+                  metadata:
+                    analysisStartTime: '2025-02-05T15:42:10Z'
+                    analysisEndTime: '2025-02-05T15:42:25Z'
+                    fileCount: 2
+                    languages:
+                      - typescript
+                  domains:
+                    - name: BillingAccount
+                      descriptionSummary: Handles billing and account management
+                      keyFiles:
+                        - src/domain/billing.ts
+                        - src/services/billing.service.ts
+                      responsibilities:
+                        - Account creation
+                        - Payment processing
+                      subdomains:
+                        - name: PaymentProcessing
+                          descriptionSummary: Processes payment transactions
+                          files:
+                            - src/services/billing.service.ts
+                          functions:
+                            - func-123
+                          classes: []
+                    - name: UsageSummary
+                      descriptionSummary: Tracks and summarizes usage metrics
+                      keyFiles:
+                        - src/domain/usage.ts
+                      responsibilities:
+                        - Usage tracking
+                        - Metrics aggregation
+                      subdomains: []
+                  relationships:
+                    - from: BillingAccount
+                      to: UsageSummary
+                      type: aggregates
+                      strength: 0.8
+                      reason: BillingAccount aggregates usage data for billing purposes
+                  fileAssignments:
+                    - filePath: src/domain/billing.ts
+                      domainName: BillingAccount
+                    - filePath: src/domain/usage.ts
+                      domainName: UsageSummary
+                  functionAssignments:
+                    - functionId: func-123
+                      subdomainName: PaymentProcessing
+                      parentDomain: BillingAccount
+                  unassignedFunctions:
+                    - functionId: func-456
+                      reason: Utility function with unclear domain association
+                  classAssignments:
+                    - classId: class-789
+                      domainName: BillingAccount
+                  functionDescriptions:
+                    - functionId: func-123
+                      descriptionSummary: Processes incoming payment transactions
+                      domainName: BillingAccount
+                    - functionId: func-456
+                      descriptionSummary: Aggregates usage metrics for billing period
+                  stats:
+                    nodeCount: 2
+                    relationshipCount: 1
+                    nodeTypes:
+                      Domain: 2
+                      Subdomain: 1
+                    relationshipTypes:
+                      contains: 1
+                    domainCount: 2
+                    subdomainCount: 1
+                    assignedFileCount: 1
+                    assignedFunctionCount: 1
+                    assignedClassCount: 0
+                    fileAssignments: 2
+                    functionAssignments: 1
+                    unassignedFunctions: 1
+                    classAssignments: 1
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainClassificationResponseAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/graphs/parse:
+    post:
+      tags:
+        - Data Plane
+      summary: Parse graph
+      description: Upload a zipped repository snapshot to generate parse tree relationships.
+      operationId: generateParseGraph
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/graphs/parse' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+        - lang: javascript
+          label: JavaScript (fetch)
+          source: |
+            import { readFile } from 'node:fs/promises';
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const form = new FormData();
+            form.append('file', new Blob([buffer], { type: 'application/zip' }), 'repo-snapshot.zip');
+
+            const res = await fetch(`${baseUrl}/v1/graphs/parse`, {
+              method: 'POST',
+              headers: {
+                'Idempotency-Key': idempotencyKey,
+                'X-Api-Key': apiKey
+              },
+              body: form
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            console.log(await res.json());
+        - lang: typescript
+          label: TypeScript (SDK)
+          source: |
+            import { Configuration, DefaultApi } from '@supermodel/public-api-typescript';
+            import { readFile } from 'node:fs/promises';
+
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const archiveBlob = new Blob([buffer], { type: 'application/zip' });
+
+            const configuration = new Configuration({ basePath: baseUrl });
+
+            const apiKeyOverride = async ({ init }) => ({
+              headers: { ...(init.headers ?? {}), 'X-Api-Key': apiKey }
+            });
+
+            const api = new DefaultApi(configuration);
+            const result = await api.generateParseGraph(
+              { idempotencyKey, file: archiveBlob },
+              apiKeyOverride
+            );
+
+            console.log(result);
+        - lang: java
+          label: Java (generated client)
+          source: |
+            import org.openapitools.client.ApiClient;
+            import org.openapitools.client.api.DefaultApi;
+
+            import java.io.File;
+
+            public class Example {
+              public static void main(String[] args) throws Exception {
+                String baseUrl = System.getenv().getOrDefault("API_BASE_URL", "https://api.supermodeltools.com");
+                String apiKey = "<api-key>";
+                String idempotencyKey = "<idempotency-key>";
+                File archive = new File("/path/to/your/repo-snapshot.zip");
+
+                ApiClient client = new ApiClient();
+                client.updateBaseUri(baseUrl);
+                client.setRequestInterceptor(rb -> {
+                  rb.header("X-Api-Key", apiKey);
+                });
+
+                DefaultApi api = new DefaultApi(client);
+                api.generateParseGraph(idempotencyKey, archive);
+              }
+            }
+        - lang: python
+          label: Python (generated client)
+          source: |
+            import os
+            from supermodel_public_api import ApiClient, Configuration
+            from supermodel_public_api.api.default_api import DefaultApi
+
+            base_url = os.environ.get("API_BASE_URL", "https://api.supermodeltools.com")
+            api_key = "<api-key>"
+            idempotency_key = "<idempotency-key>"
+
+            configuration = Configuration(host=base_url)
+            configuration.api_key["ApiKeyAuth"] = api_key
+
+            api_client = ApiClient(configuration)
+            api = DefaultApi(api_client)
+
+            with open("/path/to/your/repo-snapshot.zip", "rb") as f:
+              payload = f.read()
+
+            result = api.generate_parse_graph(idempotency_key, file=payload)
+            print(result)
+        - lang: rust
+          label: Rust (reqwest)
+          source: |
+            use bytes::Bytes;
+            use reqwest::multipart::{Form, Part};
+
+            #[tokio::main]
+            async fn main() -> anyhow::Result<()> {
+              let base_url = std::env::var("API_BASE_URL")
+                .unwrap_or_else(|_| "https://api.supermodeltools.com".to_string());
+              let api_key = "<api-key>";
+              let idempotency_key = "<idempotency-key>";
+
+              let archive_bytes = Bytes::from(tokio::fs::read("/path/to/your/repo-snapshot.zip").await?);
+              let url = format!("{}/v1/graphs/parse", base_url.trim_end_matches('/'));
+
+              let file_part = Part::bytes(archive_bytes.to_vec())
+                .file_name("repo.zip")
+                .mime_str("application/zip")?;
+              let form = Form::new().part("file", file_part);
+
+              let response = reqwest::Client::new()
+                .post(url)
+                .header("Idempotency-Key", idempotency_key)
+                .header("X-Api-Key", api_key)
+                .multipart(form)
+                .send()
+                .await?;
+              let status = response.status();
+              let body = response.bytes().await?;
+
+              if status.is_success() {
+                println!("{}", String::from_utf8_lossy(&body));
+              } else {
+                anyhow::bail!(
+                  "Request failed ({}): {}",
+                  status.as_u16(),
+                  String::from_utf8_lossy(&body)
+                );
+              }
+
+              Ok(())
+            }
+      responses:
+        '200':
+          description: Parse graph (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  generatedAt: '2025-02-05 15:42:10.000000000 Z'
+                  message: Parse graph generated successfully
+                  stats:
+                    filesProcessed: 1
+                    classes: 0
+                    functions: 1
+                    types: 0
+                    processingTimeMs: 12
+                  graph:
+                    nodes:
+                      - id: ast:src/index.ts:1:0
+                        labels:
+                          - Program
+                        properties:
+                          kind: Program
+                      - id: ast:src/index.ts:3:2
+                        labels:
+                          - FunctionDeclaration
+                        properties:
+                          name: init
+                    relationships:
+                      - id: ast:src/index.ts:1:0_contains_ast:src/index.ts:3:2
+                        type: contains
+                        startNode: ast:src/index.ts:1:0
+                        endNode: ast:src/index.ts:3:2
+                        properties:
+                          order: 1
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeGraphEnvelopeAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/graphs/supermodel:
+    post:
+      tags:
+        - Data Plane
+      summary: Supermodel graph
+      description: Upload a zipped repository snapshot to generate the Supermodel Intermediate Representation (SIR) artifact bundle.
+      operationId: generateSupermodelGraph
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/graphs/supermodel' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+        - lang: javascript
+          label: JavaScript (fetch)
+          source: |
+            import { readFile } from 'node:fs/promises';
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const form = new FormData();
+            form.append('file', new Blob([buffer], { type: 'application/zip' }), 'repo-snapshot.zip');
+
+            const res = await fetch(`${baseUrl}/v1/graphs/supermodel`, {
+              method: 'POST',
+              headers: {
+                'Idempotency-Key': idempotencyKey,
+                'X-Api-Key': apiKey
+              },
+              body: form
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            console.log(await res.json());
+        - lang: typescript
+          label: TypeScript (SDK)
+          source: |
+            import { Configuration, DefaultApi } from '@supermodel/public-api-typescript';
+            import { readFile } from 'node:fs/promises';
+
+            const baseUrl = process.env.API_BASE_URL || 'https://api.supermodeltools.com';
+            const apiKey = '<api-key>';
+            const idempotencyKey = '<idempotency-key>';
+            const archivePath = '/path/to/your/repo-snapshot.zip';
+
+            const buffer = await readFile(archivePath);
+            const archiveBlob = new Blob([buffer], { type: 'application/zip' });
+
+            const configuration = new Configuration({ basePath: baseUrl });
+
+            const apiKeyOverride = async ({ init }) => ({
+              headers: { ...(init.headers ?? {}), 'X-Api-Key': apiKey }
+            });
+
+            const api = new DefaultApi(configuration);
+            const result = await api.generateSupermodelGraph(
+              { idempotencyKey, file: archiveBlob },
+              apiKeyOverride
+            );
+
+            console.log(result);
+        - lang: java
+          label: Java (generated client)
+          source: |
+            import org.openapitools.client.ApiClient;
+            import org.openapitools.client.api.DefaultApi;
+
+            import java.io.File;
+
+            public class Example {
+              public static void main(String[] args) throws Exception {
+                String baseUrl = System.getenv().getOrDefault("API_BASE_URL", "https://api.supermodeltools.com");
+                String apiKey = "<api-key>";
+                String idempotencyKey = "<idempotency-key>";
+                File archive = new File("/path/to/your/repo-snapshot.zip");
+
+                ApiClient client = new ApiClient();
+                client.updateBaseUri(baseUrl);
+                client.setRequestInterceptor(rb -> {
+                  rb.header("X-Api-Key", apiKey);
+                });
+
+                DefaultApi api = new DefaultApi(client);
+                api.generateSupermodelGraph(idempotencyKey, archive);
+              }
+            }
+        - lang: python
+          label: Python (generated client)
+          source: |
+            import os
+            from supermodel_public_api import ApiClient, Configuration
+            from supermodel_public_api.api.default_api import DefaultApi
+
+            base_url = os.environ.get("API_BASE_URL", "https://api.supermodeltools.com")
+            api_key = "<api-key>"
+            idempotency_key = "<idempotency-key>"
+
+            configuration = Configuration(host=base_url)
+            configuration.api_key["ApiKeyAuth"] = api_key
+
+            api_client = ApiClient(configuration)
+            api = DefaultApi(api_client)
+
+            with open("/path/to/your/repo-snapshot.zip", "rb") as f:
+              payload = f.read()
+
+            result = api.generate_supermodel_graph(idempotency_key, file=payload)
+            print(result)
+        - lang: rust
+          label: Rust (reqwest)
+          source: |
+            use bytes::Bytes;
+            use reqwest::multipart::{Form, Part};
+
+            #[tokio::main]
+            async fn main() -> anyhow::Result<()> {
+              let base_url = std::env::var("API_BASE_URL")
+                .unwrap_or_else(|_| "https://api.supermodeltools.com".to_string());
+              let api_key = "<api-key>";
+              let idempotency_key = "<idempotency-key>";
+
+              let archive_bytes = Bytes::from(tokio::fs::read("/path/to/your/repo-snapshot.zip").await?);
+              let url = format!("{}/v1/graphs/supermodel", base_url.trim_end_matches('/'));
+
+              let file_part = Part::bytes(archive_bytes.to_vec())
+                .file_name("repo.zip")
+                .mime_str("application/zip")?;
+              let form = Form::new().part("file", file_part);
+
+              let response = reqwest::Client::new()
+                .post(url)
+                .header("Idempotency-Key", idempotency_key)
+                .header("X-Api-Key", api_key)
+                .multipart(form)
+                .send()
+                .await?;
+              let status = response.status();
+              let body = response.bytes().await?;
+
+              if status.is_success() {
+                println!("{}", String::from_utf8_lossy(&body));
+              } else {
+                anyhow::bail!(
+                  "Request failed ({}): {}",
+                  status.as_u16(),
+                  String::from_utf8_lossy(&body)
+                );
+              }
+
+              Ok(())
+            }
+      responses:
+        '200':
+          description: Supermodel IR document (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermodelIRAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  repo: supermodel/supermodel-public-api
+                  version: sir-2025-02-05
+                  schemaVersion: 1.2.0
+                  generatedAt: '2025-02-05 15:42:10.000000000 Z'
+                  summary:
+                    repoSizeBytes: 123456
+                    filesProcessed: 42
+                    classes: 8
+                    functions: 156
+                    types: 12
+                    primaryLanguage: typescript
+                    domains: 5
+                  graph:
+                    nodes:
+                      - id: src/index.ts
+                        labels:
+                          - File
+                        properties:
+                          path: src/index.ts
+                          name: index.ts
+                          language: typescript
+                      - id: fn:src/index.ts:main
+                        labels:
+                          - Function
+                        properties:
+                          name: main
+                          filePath: src/index.ts
+                          startLine: 10
+                          endLine: 25
+                      - id: fn:src/utils.ts:helper
+                        labels:
+                          - Function
+                        properties:
+                          name: helper
+                          filePath: src/utils.ts
+                      - id: domain:Core
+                        labels:
+                          - Domain
+                        properties:
+                          name: Core
+                          description: Core application logic
+                      - id: subdomain:Core:Initialization
+                        labels:
+                          - Subdomain
+                        properties:
+                          name: Initialization
+                          parentDomain: Core
+                    relationships:
+                      - id: src/index.ts_contains_fn:src/index.ts:main
+                        type: contains
+                        startNode: src/index.ts
+                        endNode: fn:src/index.ts:main
+                      - id: src/index.ts_imports_src/utils.ts
+                        type: imports
+                        startNode: src/index.ts
+                        endNode: src/utils.ts
+                      - id: fn:src/index.ts:main_calls_fn:src/utils.ts:helper
+                        type: calls
+                        startNode: fn:src/index.ts:main
+                        endNode: fn:src/utils.ts:helper
+                      - id: fn:src/index.ts:main_belongsTo_subdomain:Core:Initialization
+                        type: belongsTo
+                        startNode: fn:src/index.ts:main
+                        endNode: subdomain:Core:Initialization
+                  stats:
+                    nodeCount: 5
+                    relationshipCount: 4
+                    nodeTypes:
+                      File: 1
+                      Function: 2
+                      Domain: 1
+                      Subdomain: 1
+                    relationshipTypes:
+                      contains: 1
+                      imports: 1
+                      calls: 1
+                      belongsTo: 1
+                  metadata:
+                    analysisStartTime: '2025-02-05T15:42:05Z'
+                    analysisEndTime: '2025-02-05T15:42:10Z'
+                    fileCount: 2
+                    languages:
+                      - typescript
+                  domains:
+                    - name: Core
+                      descriptionSummary: Core application logic
+                      keyFiles:
+                        - src/index.ts
+                      responsibilities:
+                        - Application initialization
+                      subdomains:
+                        - name: Initialization
+                          descriptionSummary: Application startup logic
+                          files:
+                            - src/index.ts
+                          functions:
+                            - fn:src/index.ts:main
+                          classes: []
+                  artifacts:
+                    - id: artifact-usage-summary
+                      kind: summary
+                      label: Usage Insights
+                      metadata:
+                        repoSizeBytes: 123456
+                        filesProcessed: 42
+                        functions: 156
+                        classes: 8
+                    - id: parse-graph
+                      kind: graph
+                      label: Parse Graph
+                      metadata:
+                        nodeCount: 150
+                        relationshipCount: 280
+                    - id: call-graph
+                      kind: graph
+                      label: Call Graph
+                      metadata:
+                        totalFunctions: 156
+                        totalCalls: 423
+                    - id: domain-classification
+                      kind: classification
+                      label: Domain Classification
+                      metadata:
+                        domainCount: 5
+                        relationshipCount: 8
+                        fileAssignments: 42
+                        functionAssignments: 120
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermodelIRAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/analysis/dead-code:
+    post:
+      tags:
+        - Data Plane
+      summary: Dead code analysis
+      description: Upload a zipped repository snapshot to identify dead (unreachable) code candidates by combining parse graph declarations with call graph relationships.
+      operationId: generateDeadCodeAnalysis
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/analysis/dead-code' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+      responses:
+        '200':
+          description: Dead code analysis (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadCodeAnalysisResponseAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  metadata:
+                    totalDeclarations: 162
+                    deadCodeCandidates: 102
+                    aliveCode: 60
+                    analysisMethod: parse_graph + call_graph
+                    analysisStartTime: '2025-02-05T15:42:05Z'
+                    analysisEndTime: '2025-02-05T15:42:10Z'
+                  deadCodeCandidates:
+                    - file: src/utils/idGenerator.ts
+                      name: generateSequentialId
+                      line: 8
+                      type: function
+                      confidence: high
+                      reason: No callers found in codebase
+                  aliveCode:
+                    - file: src/index.ts
+                      name: main
+                      line: 10
+                      type: function
+                      callerCount: 3
+                  entryPoints:
+                    - file: src/index.ts
+                      name: main
+                      line: 10
+                      type: function
+                      reason: Module export
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadCodeAnalysisResponseAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/analysis/test-coverage-map:
+    post:
+      tags:
+        - Data Plane
+      summary: Test coverage map
+      description: Upload a zipped repository snapshot to identify functions with zero test coverage by tracing call graph reachability from test files to production code. This is static analysis — no test execution or instrumentation required.
+      operationId: generateTestCoverageMap
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/analysis/test-coverage-map' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+      responses:
+        '200':
+          description: Test coverage map (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCoverageMapResponseAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  metadata:
+                    totalFiles: 142
+                    testFiles: 28
+                    productionFiles: 114
+                    totalFunctions: 891
+                    testedFunctions: 342
+                    untestedFunctions: 549
+                    coveragePercentage: 38.4
+                    analysisMethod: static_call_graph_test_reachability
+                    analysisStartTime: '2026-02-09T12:00:00Z'
+                    analysisEndTime: '2026-02-09T12:01:00Z'
+                  untestedFunctions:
+                    - file: src/services/billing.ts
+                      name: calculateRefund
+                      line: 89
+                      type: function
+                      confidence: high
+                      reason: No test file calls this function directly or transitively
+                  testedFunctions:
+                    - file: src/services/billing.ts
+                      name: calculateTotal
+                      line: 45
+                      type: function
+                      testFiles:
+                        - tests/billing.test.ts
+                      directTestCallers: 3
+                      transitiveTestCallers: 7
+                  testFiles:
+                    - file: tests/billing.test.ts
+                      testFunctions: 12
+                      productionFunctionsCovered: 8
+                      productionFilesCovered: 3
+                  coverageByFile:
+                    - file: src/services/billing.ts
+                      totalFunctions: 12
+                      testedFunctions: 8
+                      untestedFunctions: 4
+                      coveragePercentage: 66.7
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCoverageMapResponseAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/analysis/circular-dependencies:
+    post:
+      tags:
+        - Data Plane
+      summary: Circular dependency detection
+      description: Upload a zipped repository snapshot to detect circular dependencies (dependency cycles) at the file level using Tarjan's strongly connected components algorithm.
+      operationId: generateCircularDependencyAnalysis
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+      x-codeSamples:
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/analysis/circular-dependencies' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+      responses:
+        '200':
+          description: Circular dependency analysis (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircularDependencyResponseAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  metadata:
+                    totalFiles: 142
+                    totalImports: 487
+                    cycleCount: 7
+                    analysisMethod: tarjan_scc
+                    analysisStartTime: '2026-02-09T12:00:00Z'
+                    analysisEndTime: '2026-02-09T12:00:05Z'
+                  cycles:
+                    - id: cycle-1
+                      severity: high
+                      files:
+                        - src/services/billingService.ts
+                        - src/services/orderService.ts
+                        - src/services/userService.ts
+                      edges:
+                        - source: src/services/userService.ts
+                          target: src/services/orderService.ts
+                          importedSymbols:
+                            - getOrders
+                            - OrderStatus
+                        - source: src/services/orderService.ts
+                          target: src/services/billingService.ts
+                          importedSymbols:
+                            - calculateTotal
+                        - source: src/services/billingService.ts
+                          target: src/services/userService.ts
+                          importedSymbols:
+                            - getUserDiscount
+                      breakingSuggestion: src/services/billingService.ts -> src/services/userService.ts
+                  summary:
+                    totalCycles: 7
+                    filesInCycles: 18
+                    highSeverityCount: 2
+                    mediumSeverityCount: 3
+                    lowSeverityCount: 2
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircularDependencyResponseAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/analysis/impact:
+    post:
+      tags:
+        - Data Plane
+      summary: Impact analysis
+      description: |-
+        Compute blast radius — what breaks if a given file or function changes. Uses reverse-reachability BFS on call graph and dependency graph, enriched with LLM-powered domain classification to detect cross-domain impact.
+
+        **Three usage modes:**
+        1. **With diff** — upload a unified diff (`git diff` output) alongside the repo zip.
+           Changed files are automatically extracted as targets. Best for CI/CD pipelines.
+
+        2. **With targets** — specify files or file:function pairs via query parameter.
+           Best for ad-hoc analysis of specific functions.
+
+        3. **Neither** — analyzes the entire codebase and returns a global coupling/risk map
+           with the most critical files ranked by dependent count.
+
+
+        **CI Integration (GitHub Actions):**
+        ```yaml - name: Impact Analysis
+          run: |
+            git diff origin/main...HEAD > changes.diff
+            git archive --format=zip HEAD -o repo.zip
+            curl -s -X POST "$SUPERMODEL_API_URL/v1/analysis/impact" \
+              -H "Idempotency-Key: ${{ github.run_id }}-impact" \
+              -H "X-Api-Key: ${{ secrets.SUPERMODEL_API_KEY }}" \
+              -F "file=@repo.zip;type=application/zip" \
+              -F "diff=@changes.diff;type=text/plain" \
+              -o impact.json
+        ```
+
+        **CI Integration (GitLab CI):**
+        ```yaml impact_analysis:
+          script:
+            - git diff origin/main...HEAD > changes.diff
+            - git archive --format=zip HEAD -o repo.zip
+            - >-
+              curl -s -X POST "$SUPERMODEL_API_URL/v1/analysis/impact"
+              -H "Idempotency-Key: $CI_PIPELINE_IID-impact"
+              -H "X-Api-Key: $SUPERMODEL_API_KEY"
+              -F "file=@repo.zip;type=application/zip"
+              -F "diff=@changes.diff;type=text/plain"
+              -o impact.json
+        ```
+
+        **Standalone usage (no CI):**
+        ```bash # Analyze specific targets curl -X POST '.../v1/analysis/impact?targets=src/services/billing.ts:calculateTotal' \
+          -H 'Idempotency-Key: my-key' -H 'X-Api-Key: ...' \
+          -F 'file=@repo.zip;type=application/zip'
+
+        # Analyze from a diff git diff main > changes.diff && git archive --format=zip HEAD -o repo.zip curl -X POST '.../v1/analysis/impact' \
+          -H 'Idempotency-Key: my-key' -H 'X-Api-Key: ...' \
+          -F 'file=@repo.zip;type=application/zip' \
+          -F 'diff=@changes.diff;type=text/plain'
+
+        # Global coupling map (no targets, no diff) curl -X POST '.../v1/analysis/impact' \
+          -H 'Idempotency-Key: my-key' -H 'X-Api-Key: ...' \
+          -F 'file=@repo.zip;type=application/zip'
+        ```
+      operationId: generateImpactAnalysis
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: targets
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'Comma-separated list of file paths or file:functionName pairs to analyze. If omitted, analyzes all files and returns a global coupling/risk map. Examples: ''src/services/billing.ts'', ''src/services/billing.ts:calculateTotal,src/auth/login.ts''.'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Zipped repository archive containing the code to analyze.
+                diff:
+                  type: string
+                  format: binary
+                  description: Optional unified diff (output of `git diff`). When provided, changed files are automatically extracted and used as analysis targets. This is the recommended input for CI/CD pipelines. If both `diff` and `targets` are provided, the targets from both are merged.
+      x-codeSamples:
+        - lang: cURL
+          label: With diff (CI)
+          source: |
+            git diff origin/main...HEAD > changes.diff
+            git archive --format=zip HEAD -o repo.zip
+            curl -X POST 'https://api.supermodeltools.com/v1/analysis/impact' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@repo.zip;type=application/zip' \
+              -F 'diff=@changes.diff;type=text/plain'
+        - lang: cURL
+          label: With targets
+          source: |
+            curl -X POST 'https://api.supermodeltools.com/v1/analysis/impact?targets=src/services/billing.ts' \
+              -H 'Idempotency-Key: <idempotency-key>' \
+              -H 'X-Api-Key: <api-key>' \
+              -F 'file=@/path/to/your/repo-snapshot.zip;type=application/zip'
+      responses:
+        '200':
+          description: Impact analysis (job completed)
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            X-Usage-Units:
+              $ref: '#/components/headers/X-Usage-Units'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisResponseAsync'
+              example:
+                status: completed
+                jobId: abc-123-def
+                result:
+                  metadata:
+                    totalFiles: 142
+                    totalFunctions: 891
+                    targetsAnalyzed: 1
+                    analysisMethod: reverse_reachability_call_graph
+                    analysisStartTime: '2026-02-09T12:00:00Z'
+                    analysisEndTime: '2026-02-09T12:00:45Z'
+                  impacts:
+                    - target:
+                        file: src/services/billing.ts
+                        name: calculateTotal
+                        line: 45
+                        type: function
+                      blastRadius:
+                        directDependents: 8
+                        transitiveDependents: 31
+                        affectedFiles: 12
+                        affectedDomains:
+                          - Billing
+                          - Checkout
+                          - Notifications
+                        riskScore: high
+                        riskFactors:
+                          - High fan-in (8 direct callers)
+                          - Deep dependency chain (5 levels)
+                          - Crosses 3 domain boundaries
+                      affectedFunctions:
+                        - file: src/handlers/checkout.ts
+                          name: processCheckout
+                          line: 12
+                          type: function
+                          distance: 1
+                          relationship: direct_caller
+                      affectedFiles:
+                        - file: src/handlers/checkout.ts
+                          directDependencies: 3
+                          transitiveDependencies: 7
+                      entryPointsAffected:
+                        - file: src/routes/checkout.ts
+                          name: POST /checkout
+                          type: route_handler
+                  globalMetrics:
+                    mostCriticalFiles:
+                      - file: src/services/billing.ts
+                        dependentCount: 31
+                        riskScore: high
+                    crossDomainDependencies:
+                      - from: Billing
+                        to: Checkout
+                        edgeCount: 5
+                      - from: Billing
+                        to: Notifications
+                        edgeCount: 2
+        '202':
+          description: Job accepted and processing
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
+            X-API-Version:
+              $ref: '#/components/headers/X-API-Version'
+            Retry-After:
+              description: Recommended wait time in seconds before polling again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactAnalysisResponseAsync'
+              example:
+                status: processing
+                jobId: abc-123-def
+                retryAfter: 10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API key issued by the control plane for accessing data plane resources.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: HTTP Bearer authentication using an OAuth provider-issued access token presented via the Authorization header.
+    StripeSecret:
+      type: apiKey
+      in: header
+      name: Stripe-Secret
+      description: Shared secret used to authorize Stripe webhook callbacks.
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique identifier for this request for idempotency and tracing.
+      schema:
+        type: string
+  headers:
+    X-Request-Id:
+      description: Unique request identifier echoed back from the Idempotency-Key header.
+      schema:
+        type: string
+    X-API-Version:
+      description: Semantic version of the API service handling the request.
+      schema:
+        type: string
+    RateLimit-Limit:
+      description: Maximum number of requests allowed in the current rate limit window.
+      schema:
+        type: integer
+        format: int32
+    RateLimit-Remaining:
+      description: Remaining number of requests available in the current rate limit window.
+      schema:
+        type: integer
+        format: int32
+    RateLimit-Reset:
+      description: UTC epoch seconds when the current rate limit window resets.
+      schema:
+        type: integer
+        format: int64
+    X-Usage-Units:
+      description: Metered usage units consumed by this request.
+      schema:
+        type: number
+        format: float
+  responses:
+    BadRequest:
+      description: The request could not be processed because of a client error.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 400
+            code: invalid_request
+            message: Missing required query parameter 'repo'.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEF1234
+            details:
+              - field: repo
+                issue: This field is required.
+                location: query
+    Unauthorized:
+      description: Authentication failed or was not provided.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 401
+            code: unauthorized
+            message: Provide a valid OAuth token to access this resource.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEFXYZ1
+    Forbidden:
+      description: The authenticated principal lacks the required permissions.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 403
+            code: forbidden
+            message: The token lacks the required keys:write scope.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEFFORB
+    NotFound:
+      description: The requested resource could not be found.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 404
+            code: not_found
+            message: API key ak_live_missing was not found.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEFF404
+    TooManyRequests:
+      description: The rate limit for the resource has been exceeded.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 429
+            code: rate_limit_exceeded
+            message: Too many requests. Try again after the reset window.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEFRATE
+    InternalError:
+      description: The server encountered an unexpected condition.
+      headers:
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
+        X-API-Version:
+          $ref: '#/components/headers/X-API-Version'
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        X-Usage-Units:
+          $ref: '#/components/headers/X-Usage-Units'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 500
+            code: internal_error
+            message: Unexpected error processing request. Please retry.
+            timestamp: '2025-02-05 16:35:12.000000000 Z'
+            requestId: req_01HZYJ9CE0ABCDEFFAIL
+  schemas:
+    CodeGraphNode:
+      type: object
+      properties:
+        id:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        properties:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+    CodeGraphRelationship:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        startNode:
+          type: string
+        endNode:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - startNode
+        - endNode
+    CodeGraphStats:
+      type: object
+      properties:
+        nodeCount:
+          type: integer
+          format: int64
+          description: Total number of nodes in the graph
+        relationshipCount:
+          type: integer
+          format: int64
+          description: Total number of relationships in the graph
+        nodeTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of nodes by type
+        relationshipTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of relationships by type
+        filesProcessed:
+          type: integer
+          format: int64
+        classes:
+          type: integer
+          format: int64
+        functions:
+          type: integer
+          format: int64
+        types:
+          type: integer
+          format: int64
+        processingTimeMs:
+          type: number
+    CodeGraphEnvelope:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        message:
+          type: string
+        stats:
+          $ref: '#/components/schemas/CodeGraphStats'
+        metadata:
+          type: object
+          properties:
+            analysisStartTime:
+              type: string
+              format: date-time
+            analysisEndTime:
+              type: string
+              format: date-time
+            fileCount:
+              type: integer
+            languages:
+              type: array
+              items:
+                type: string
+          description: Analysis metadata including timing and file information
+        graph:
+          type: object
+          properties:
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/CodeGraphNode'
+            relationships:
+              type: array
+              items:
+                $ref: '#/components/schemas/CodeGraphRelationship'
+          required:
+            - nodes
+            - relationships
+      required:
+        - graph
+    JobStatus:
+      type: object
+      description: Common fields for async job status tracking.
+      required:
+        - status
+        - jobId
+      properties:
+        status:
+          type: string
+          description: Current status of the job.
+          enum:
+            - pending
+            - processing
+            - completed
+            - failed
+        jobId:
+          type: string
+          description: Unique identifier for the job.
+        retryAfter:
+          type: integer
+          format: int32
+          description: Recommended seconds to wait before polling again.
+        error:
+          type: string
+          description: Error message (present when status is failed).
+    CodeGraphEnvelopeAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for code graph operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/CodeGraphEnvelope'
+              description: The result (present when status is completed).
+    DomainClassificationResponseAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for domain classification operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/DomainClassificationResponse'
+              description: The result (present when status is completed).
+    SupermodelIRAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for Supermodel IR operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/SupermodelIR'
+              description: The result (present when status is completed).
+    DeadCodeAnalysisResponseAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for dead code analysis operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/DeadCodeAnalysisResponse'
+              description: The result (present when status is completed).
+    TestCoverageMapResponseAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for test coverage map operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/TestCoverageMapResponse'
+              description: The result (present when status is completed).
+    CircularDependencyResponseAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for circular dependency analysis operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/CircularDependencyResponse'
+              description: The result (present when status is completed).
+    ImpactAnalysisResponseAsync:
+      allOf:
+        - $ref: '#/components/schemas/JobStatus'
+        - type: object
+          description: Async response envelope for impact analysis operations.
+          properties:
+            result:
+              $ref: '#/components/schemas/ImpactAnalysisResponse'
+              description: The result (present when status is completed).
+    ImpactAnalysisResponse:
+      type: object
+      description: Impact analysis result containing blast radius and affected functions/files.
+      required:
+        - metadata
+        - impacts
+        - globalMetrics
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ImpactAnalysisMetadata'
+        impacts:
+          type: array
+          description: Impact results for each analyzed target.
+          items:
+            $ref: '#/components/schemas/ImpactResult'
+        globalMetrics:
+          $ref: '#/components/schemas/ImpactGlobalMetrics'
+    ImpactAnalysisMetadata:
+      type: object
+      description: Summary statistics for the impact analysis.
+      required:
+        - totalFiles
+        - totalFunctions
+        - targetsAnalyzed
+        - analysisMethod
+      properties:
+        totalFiles:
+          type: integer
+          format: int64
+          description: Total number of files in the repository.
+        totalFunctions:
+          type: integer
+          format: int64
+          description: Total number of functions analyzed.
+        targetsAnalyzed:
+          type: integer
+          format: int32
+          description: Number of targets analyzed.
+        analysisMethod:
+          type: string
+          description: Method used for impact analysis.
+        analysisStartTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis started.
+        analysisEndTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis completed.
+    ImpactResult:
+      type: object
+      description: Impact analysis result for a single target.
+      required:
+        - target
+        - blastRadius
+        - affectedFunctions
+        - affectedFiles
+        - entryPointsAffected
+      properties:
+        target:
+          $ref: '#/components/schemas/ImpactTarget'
+        blastRadius:
+          $ref: '#/components/schemas/BlastRadius'
+        affectedFunctions:
+          type: array
+          description: Functions affected by changes to this target.
+          items:
+            $ref: '#/components/schemas/AffectedFunction'
+        affectedFiles:
+          type: array
+          description: Files affected by changes to this target.
+          items:
+            $ref: '#/components/schemas/AffectedFile'
+        entryPointsAffected:
+          type: array
+          description: Entry points (route handlers, exports) affected by this target.
+          items:
+            $ref: '#/components/schemas/AffectedEntryPoint'
+    ImpactTarget:
+      type: object
+      description: The target file or function being analyzed for impact.
+      required:
+        - file
+        - type
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Function or method name (if targeting a specific function).
+        line:
+          type: integer
+          format: int32
+          description: Line number of the target declaration.
+        type:
+          type: string
+          description: Type of the target element.
+          enum:
+            - file
+            - function
+            - method
+            - class
+    BlastRadius:
+      type: object
+      description: Blast radius metrics for a target.
+      required:
+        - directDependents
+        - transitiveDependents
+        - affectedFiles
+        - riskScore
+      properties:
+        directDependents:
+          type: integer
+          format: int32
+          description: Number of direct callers/dependents.
+        transitiveDependents:
+          type: integer
+          format: int32
+          description: Number of transitive (indirect) dependents.
+        affectedFiles:
+          type: integer
+          format: int32
+          description: Number of files affected.
+        affectedDomains:
+          type: array
+          description: Domains affected by this change (scaffolded, empty in v1).
+          items:
+            type: string
+        riskScore:
+          type: string
+          description: Risk level based on blast radius analysis.
+          enum:
+            - low
+            - medium
+            - high
+            - critical
+        riskFactors:
+          type: array
+          description: Human-readable explanations for the risk score.
+          items:
+            type: string
+    AffectedFunction:
+      type: object
+      description: A function affected by changes to the target.
+      required:
+        - file
+        - name
+        - type
+        - distance
+        - relationship
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the affected function.
+        line:
+          type: integer
+          format: int32
+          description: Line number of the function declaration.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - method
+            - class
+        distance:
+          type: integer
+          format: int32
+          description: Number of hops from the target in the call graph.
+        relationship:
+          type: string
+          description: Relationship type to the target.
+          enum:
+            - direct_caller
+            - transitive_caller
+    AffectedFile:
+      type: object
+      description: A file affected by changes to the target.
+      required:
+        - file
+        - directDependencies
+        - transitiveDependencies
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        directDependencies:
+          type: integer
+          format: int32
+          description: Number of direct dependencies in this file.
+        transitiveDependencies:
+          type: integer
+          format: int32
+          description: Number of transitive dependencies in this file.
+    AffectedEntryPoint:
+      type: object
+      description: An entry point affected by changes to the target.
+      required:
+        - file
+        - name
+        - type
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name or route of the entry point.
+        type:
+          type: string
+          description: Type of entry point.
+          enum:
+            - route_handler
+            - module_export
+            - main_function
+            - event_handler
+    ImpactGlobalMetrics:
+      type: object
+      description: Global metrics across all analyzed targets.
+      properties:
+        mostCriticalFiles:
+          type: array
+          description: Files with the highest dependent counts.
+          items:
+            $ref: '#/components/schemas/CriticalFile'
+        crossDomainDependencies:
+          type: array
+          description: Dependencies that cross domain boundaries (scaffolded, empty in v1).
+          items:
+            $ref: '#/components/schemas/CrossDomainDependency'
+    CriticalFile:
+      type: object
+      description: A file identified as critical due to high dependent count.
+      required:
+        - file
+        - dependentCount
+        - riskScore
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        dependentCount:
+          type: integer
+          format: int32
+          description: Total number of transitive dependents.
+        riskScore:
+          type: string
+          description: Risk level based on dependent count.
+          enum:
+            - low
+            - medium
+            - high
+            - critical
+    CrossDomainDependency:
+      type: object
+      description: A dependency that crosses domain boundaries.
+      required:
+        - from
+        - to
+        - edgeCount
+      properties:
+        from:
+          type: string
+          description: Source domain.
+        to:
+          type: string
+          description: Target domain.
+        edgeCount:
+          type: integer
+          format: int32
+          description: Number of cross-domain edges.
+    DeadCodeAnalysisResponse:
+      type: object
+      description: Dead code analysis result containing candidates and alive code.
+      required:
+        - metadata
+        - deadCodeCandidates
+        - aliveCode
+        - entryPoints
+      properties:
+        metadata:
+          $ref: '#/components/schemas/DeadCodeAnalysisMetadata'
+        deadCodeCandidates:
+          type: array
+          description: Code elements with no detected callers or references.
+          items:
+            $ref: '#/components/schemas/DeadCodeCandidate'
+        aliveCode:
+          type: array
+          description: Code elements with at least one caller or reference.
+          items:
+            $ref: '#/components/schemas/AliveCodeItem'
+        entryPoints:
+          type: array
+          description: Detected entry points (exports, route handlers, main functions).
+          items:
+            $ref: '#/components/schemas/EntryPoint'
+    DeadCodeAnalysisMetadata:
+      type: object
+      description: Summary statistics for the dead code analysis.
+      required:
+        - totalDeclarations
+        - deadCodeCandidates
+        - aliveCode
+        - analysisMethod
+      properties:
+        totalDeclarations:
+          type: integer
+          format: int64
+          description: Total number of declarations (functions, classes, methods) analyzed.
+        deadCodeCandidates:
+          type: integer
+          format: int64
+          description: Number of dead code candidates found.
+        aliveCode:
+          type: integer
+          format: int64
+          description: Number of code elements with active references.
+        rootFilesCount:
+          type: integer
+          format: int64
+          description: Number of root files detected (files with no importers, used as entry points).
+        transitiveDeadCount:
+          type: integer
+          format: int64
+          description: Number of functions detected as dead via transitive propagation (all callers are dead).
+        symbolLevelDeadCount:
+          type: integer
+          format: int64
+          description: Number of exports detected as dead via symbol-level import analysis (exported but never imported by name).
+        analysisMethod:
+          type: string
+          description: Method used for analysis (e.g., 'dependency_graph_reachability').
+        analysisStartTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis started.
+        analysisEndTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis completed.
+    DeadCodeCandidate:
+      type: object
+      description: A code element identified as potentially dead (unreachable).
+      required:
+        - file
+        - name
+        - line
+        - type
+        - confidence
+        - reason
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the function, class, or method.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the declaration starts.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - class
+            - method
+            - interface
+            - type
+            - variable
+            - constant
+        confidence:
+          type: string
+          description: Confidence level of dead code detection.
+          enum:
+            - high
+            - medium
+            - low
+        reason:
+          type: string
+          description: Explanation of why this was flagged as dead code.
+    AliveCodeItem:
+      type: object
+      description: A code element with active callers or references.
+      required:
+        - file
+        - name
+        - line
+        - type
+        - callerCount
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the function, class, or method.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the declaration starts.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - class
+            - method
+            - interface
+            - type
+            - variable
+            - constant
+        callerCount:
+          type: integer
+          format: int32
+          description: Number of unique callers or references.
+    EntryPoint:
+      type: object
+      description: A detected entry point that should not be flagged as dead code.
+      required:
+        - file
+        - name
+        - line
+        - type
+        - reason
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the entry point.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the entry point is declared.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - class
+            - method
+            - interface
+            - type
+            - variable
+            - constant
+        reason:
+          type: string
+          description: Reason this is considered an entry point (e.g., 'Module export', 'Route handler', 'Main function').
+    TestCoverageMapResponse:
+      type: object
+      description: Test coverage map result identifying tested and untested functions via static call graph reachability from test files.
+      required:
+        - metadata
+        - untestedFunctions
+        - testedFunctions
+        - testFiles
+        - coverageByFile
+      properties:
+        metadata:
+          $ref: '#/components/schemas/TestCoverageMapMetadata'
+        untestedFunctions:
+          type: array
+          description: Production functions with no test coverage (not reachable from any test function).
+          items:
+            $ref: '#/components/schemas/UntestedFunction'
+        testedFunctions:
+          type: array
+          description: Production functions with test coverage (reachable from at least one test function).
+          items:
+            $ref: '#/components/schemas/TestedFunction'
+        testFiles:
+          type: array
+          description: Detected test files with coverage statistics.
+          items:
+            $ref: '#/components/schemas/TestFileInfo'
+        coverageByDomain:
+          type: array
+          description: Coverage breakdown by domain classification.
+          items:
+            $ref: '#/components/schemas/CoverageByDomain'
+        coverageByFile:
+          type: array
+          description: Coverage breakdown by production file.
+          items:
+            $ref: '#/components/schemas/CoverageByFile'
+    TestCoverageMapMetadata:
+      type: object
+      description: Summary statistics for the test coverage map analysis.
+      required:
+        - totalFiles
+        - testFiles
+        - productionFiles
+        - totalFunctions
+        - testedFunctions
+        - untestedFunctions
+        - coveragePercentage
+        - analysisMethod
+      properties:
+        totalFiles:
+          type: integer
+          format: int64
+          description: Total number of files in the repository.
+        testFiles:
+          type: integer
+          format: int64
+          description: Number of files identified as test files.
+        productionFiles:
+          type: integer
+          format: int64
+          description: Number of non-test (production) files.
+        totalFunctions:
+          type: integer
+          format: int64
+          description: Total number of functions in production files.
+        testedFunctions:
+          type: integer
+          format: int64
+          description: Number of production functions reachable from test functions.
+        untestedFunctions:
+          type: integer
+          format: int64
+          description: Number of production functions not reachable from any test function.
+        coveragePercentage:
+          type: number
+          format: double
+          description: Percentage of production functions with test coverage.
+        analysisMethod:
+          type: string
+          description: Method used for analysis.
+        analysisStartTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis started.
+        analysisEndTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis completed.
+    UntestedFunction:
+      type: object
+      description: A production function with no test coverage.
+      required:
+        - file
+        - name
+        - line
+        - type
+        - confidence
+        - reason
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the function or method.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the function is declared.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - class
+            - method
+            - interface
+            - type
+            - variable
+            - constant
+        confidence:
+          type: string
+          description: Confidence level of the untested classification.
+          enum:
+            - high
+            - medium
+            - low
+        reason:
+          type: string
+          description: Explanation of why this function is classified as untested.
+        nearestTestedCaller:
+          $ref: '#/components/schemas/NearestTestedCaller'
+        suggestedTestFile:
+          type: string
+          description: The test file that covers the most sibling functions in the same production file. This is the recommended file in which to add a test for this untested function.
+        testedSiblings:
+          type: array
+          description: Other functions in the same file that ARE tested, along with which test files cover them. Use this to see existing test patterns you can follow.
+          items:
+            $ref: '#/components/schemas/TestedSibling'
+    TestedSibling:
+      type: object
+      description: A sibling function in the same file that has test coverage.
+      required:
+        - name
+        - line
+        - testFiles
+      properties:
+        name:
+          type: string
+          description: Name of the tested sibling function.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the sibling function is declared.
+        testFiles:
+          type: array
+          description: Test files that cover this sibling function.
+          items:
+            type: string
+    NearestTestedCaller:
+      type: object
+      description: The nearest function in the call graph that has test coverage.
+      required:
+        - file
+        - name
+        - distance
+      properties:
+        file:
+          type: string
+          description: File path of the nearest tested function.
+        name:
+          type: string
+          description: Name of the nearest tested function.
+        distance:
+          type: integer
+          format: int32
+          description: Number of call graph hops to the nearest tested function.
+    TestedFunction:
+      type: object
+      description: A production function reachable from at least one test function.
+      required:
+        - file
+        - name
+        - line
+        - type
+        - testFiles
+        - directTestCallers
+        - transitiveTestCallers
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        name:
+          type: string
+          description: Name of the function or method.
+        line:
+          type: integer
+          format: int32
+          description: Line number where the function is declared.
+        type:
+          type: string
+          description: Type of code element.
+          enum:
+            - function
+            - class
+            - method
+            - interface
+            - type
+            - variable
+            - constant
+        testFiles:
+          type: array
+          description: Test files that cover this function (directly or transitively).
+          items:
+            type: string
+        directTestCallers:
+          type: integer
+          format: int32
+          description: Number of test functions that directly call this function.
+        transitiveTestCallers:
+          type: integer
+          format: int32
+          description: Number of test functions that transitively reach this function.
+    TestFileInfo:
+      type: object
+      description: Information about a detected test file.
+      required:
+        - file
+        - testFunctions
+        - productionFunctionsCovered
+        - productionFilesCovered
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        testFunctions:
+          type: integer
+          format: int32
+          description: Number of test functions defined in this file.
+        productionFunctionsCovered:
+          type: integer
+          format: int32
+          description: Number of unique production functions covered by tests in this file.
+        productionFilesCovered:
+          type: integer
+          format: int32
+          description: Number of unique production files covered by tests in this file.
+    CoverageByDomain:
+      type: object
+      description: Test coverage breakdown for a domain.
+      required:
+        - domain
+        - totalFunctions
+        - testedFunctions
+        - coveragePercentage
+      properties:
+        domain:
+          type: string
+          description: Domain name from domain classification.
+        totalFunctions:
+          type: integer
+          format: int32
+          description: Total functions in the domain.
+        testedFunctions:
+          type: integer
+          format: int32
+          description: Number of tested functions in the domain.
+        coveragePercentage:
+          type: number
+          format: double
+          description: Coverage percentage for the domain.
+    CoverageByFile:
+      type: object
+      description: Test coverage breakdown for a production file.
+      required:
+        - file
+        - totalFunctions
+        - testedFunctions
+        - untestedFunctions
+        - coveragePercentage
+      properties:
+        file:
+          type: string
+          description: File path relative to repository root.
+        totalFunctions:
+          type: integer
+          format: int32
+          description: Total functions in the file.
+        testedFunctions:
+          type: integer
+          format: int32
+          description: Number of tested functions in the file.
+        untestedFunctions:
+          type: integer
+          format: int32
+          description: Number of untested functions in the file.
+        coveragePercentage:
+          type: number
+          format: double
+          description: Coverage percentage for the file.
+    CircularDependencyResponse:
+      type: object
+      description: Circular dependency analysis result containing detected cycles and summary.
+      required:
+        - metadata
+        - cycles
+        - summary
+      properties:
+        metadata:
+          $ref: '#/components/schemas/CircularDependencyMetadata'
+        cycles:
+          type: array
+          description: Detected dependency cycles.
+          items:
+            $ref: '#/components/schemas/CircularDependencyCycle'
+        summary:
+          $ref: '#/components/schemas/CircularDependencySummary'
+    CircularDependencyMetadata:
+      type: object
+      description: Summary statistics for the circular dependency analysis.
+      required:
+        - totalFiles
+        - totalImports
+        - cycleCount
+        - analysisMethod
+      properties:
+        totalFiles:
+          type: integer
+          format: int32
+          description: Total number of files in the dependency graph.
+        totalImports:
+          type: integer
+          format: int32
+          description: Total number of import relationships.
+        cycleCount:
+          type: integer
+          format: int32
+          description: Number of cycles found.
+        analysisMethod:
+          type: string
+          description: Algorithm used for cycle detection (e.g., tarjan_scc).
+        analysisStartTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis started.
+        analysisEndTime:
+          type: string
+          format: date-time
+          description: Timestamp when analysis completed.
+    CircularDependencyCycle:
+      type: object
+      description: A single dependency cycle (strongly connected component).
+      required:
+        - id
+        - files
+        - edges
+        - severity
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this cycle (e.g., cycle-1).
+        files:
+          type: array
+          description: Files involved in this cycle, sorted alphabetically.
+          items:
+            type: string
+        edges:
+          type: array
+          description: Import edges that form this cycle.
+          items:
+            $ref: '#/components/schemas/CycleEdge'
+        severity:
+          type: string
+          description: Severity of this cycle based on cross-directory span and size.
+          enum:
+            - low
+            - medium
+            - high
+        breakingSuggestion:
+          type: string
+          description: Suggested edge to break to resolve this cycle.
+    CycleEdge:
+      type: object
+      description: A directed import edge within a cycle.
+      required:
+        - source
+        - target
+        - importedSymbols
+      properties:
+        source:
+          type: string
+          description: File path of the importing file.
+        target:
+          type: string
+          description: File path of the imported file.
+        importedSymbols:
+          type: array
+          description: Symbols imported along this edge.
+          items:
+            type: string
+    CircularDependencySummary:
+      type: object
+      description: Aggregate summary of circular dependency analysis.
+      required:
+        - totalCycles
+        - filesInCycles
+        - highSeverityCount
+        - mediumSeverityCount
+        - lowSeverityCount
+      properties:
+        totalCycles:
+          type: integer
+          format: int32
+          description: Total number of cycles found.
+        filesInCycles:
+          type: integer
+          format: int32
+          description: Number of unique files involved in at least one cycle.
+        highSeverityCount:
+          type: integer
+          format: int32
+          description: Number of high-severity cycles.
+        mediumSeverityCount:
+          type: integer
+          format: int32
+          description: Number of medium-severity cycles.
+        lowSeverityCount:
+          type: integer
+          format: int32
+          description: Number of low-severity cycles.
+    Error:
+      type: object
+      description: Standardized error payload returned by the API.
+      required:
+        - status
+        - code
+        - message
+        - timestamp
+      properties:
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code associated with the error.
+          minimum: 100
+          maximum: 599
+        code:
+          type: string
+          description: Stable, machine-readable error identifier.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO-8601 timestamp indicating when the error occurred.
+        requestId:
+          type: string
+          description: Correlation identifier for tracing the failing request.
+        details:
+          type: array
+          description: Optional list of contextual error details.
+          items:
+            type: object
+            required:
+              - field
+              - issue
+            properties:
+              field:
+                type: string
+                description: Name of the field or parameter related to the error.
+              issue:
+                type: string
+                description: Description of the specific issue encountered.
+              location:
+                type: string
+                description: Where the field resides (e.g., query, path, body).
+    SupermodelArtifact:
+      type: object
+      required:
+        - id
+        - kind
+        - label
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the artifact.
+        kind:
+          type: string
+          description: Artifact kind such as graph, summary, or embedding.
+        label:
+          type: string
+          description: Human-readable name for the artifact.
+        metadata:
+          type: object
+          description: Additional metadata for consuming the artifact.
+          additionalProperties: true
+    SupermodelIR:
+      type: object
+      required:
+        - repo
+        - version
+        - schemaVersion
+        - generatedAt
+        - graph
+        - stats
+        - metadata
+        - domains
+      properties:
+        repo:
+          type: string
+          description: Repository slug the IR was generated from.
+        version:
+          type: string
+          description: Version identifier for the IR content.
+        schemaVersion:
+          type: string
+          description: Version of the IR schema.
+        generatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the IR was generated.
+        summary:
+          type: object
+          description: High-level metadata and summary insights including filesProcessed, classes, functions, types, primaryLanguage, and domains count.
+          additionalProperties: true
+        stats:
+          type: object
+          properties:
+            nodeCount:
+              type: integer
+              format: int64
+            relationshipCount:
+              type: integer
+              format: int64
+            nodeTypes:
+              type: object
+              additionalProperties:
+                type: integer
+            relationshipTypes:
+              type: object
+              additionalProperties:
+                type: integer
+          description: Graph statistics including node and relationship counts by type
+        metadata:
+          type: object
+          properties:
+            analysisStartTime:
+              type: string
+              format: date-time
+            analysisEndTime:
+              type: string
+              format: date-time
+            fileCount:
+              type: integer
+            languages:
+              type: array
+              items:
+                type: string
+          description: Analysis metadata including timing and file information
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainSummary'
+          description: Array of discovered domain entities
+        graph:
+          type: object
+          description: Unified code graph containing all nodes and relationships.
+          properties:
+            nodes:
+              type: array
+              description: All nodes from parse graph, call graph, and domain classification.
+              items:
+                $ref: '#/components/schemas/CodeGraphNode'
+            relationships:
+              type: array
+              description: All relationships including contains, imports, calls, and belongsTo.
+              items:
+                $ref: '#/components/schemas/CodeGraphRelationship'
+          required:
+            - nodes
+            - relationships
+        artifacts:
+          type: array
+          description: Per-source statistics and metadata for parse graph, call graph, and domain classification.
+          items:
+            $ref: '#/components/schemas/SupermodelArtifact'
+    DomainClassificationResponse:
+      type: object
+      properties:
+        runId:
+          type: string
+          description: Unique identifier for this classification run
+        graph:
+          type: object
+          properties:
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/CodeGraphNode'
+            relationships:
+              type: array
+              items:
+                $ref: '#/components/schemas/CodeGraphRelationship'
+          required:
+            - nodes
+            - relationships
+          description: Graph representation with Domain and Subdomain nodes
+        metadata:
+          type: object
+          properties:
+            analysisStartTime:
+              type: string
+              format: date-time
+            analysisEndTime:
+              type: string
+              format: date-time
+            fileCount:
+              type: integer
+            languages:
+              type: array
+              items:
+                type: string
+          description: Analysis metadata including timing and file information
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainSummary'
+          description: Array of primary domain entities
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainRelationship'
+          description: High-level relationships between domains/subdomains
+        fileAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainFileAssignment'
+          description: Mapping of files to domains
+        functionAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainFunctionAssignment'
+          description: Mapping of functions to subdomains
+        unassignedFunctions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnassignedFunction'
+          description: Functions that could not be assigned to a domain/subdomain
+        classAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainClassAssignment'
+          description: Mapping of classes to domains
+        functionDescriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionDescription'
+          description: Optional enriched descriptions per function
+        stats:
+          $ref: '#/components/schemas/ClassificationStats'
+      required:
+        - runId
+        - graph
+        - metadata
+        - domains
+        - relationships
+        - fileAssignments
+        - functionAssignments
+        - unassignedFunctions
+        - classAssignments
+        - stats
+    DomainSummary:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Domain name (e.g., BillingAccount)
+        descriptionSummary:
+          type: string
+          description: Human-readable description of the domain
+        keyFiles:
+          type: array
+          items:
+            type: string
+          description: Representative files backing the domain
+        responsibilities:
+          type: array
+          items:
+            type: string
+          description: Key responsibilities/concerns of the domain
+        subdomains:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubdomainSummary'
+          description: Subdomains for this domain
+      required:
+        - name
+        - descriptionSummary
+        - keyFiles
+        - responsibilities
+        - subdomains
+    SubdomainSummary:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Subdomain name
+        descriptionSummary:
+          type: string
+          description: Concise description of the subdomain
+        files:
+          type: array
+          items:
+            type: string
+          description: List of file paths assigned to this subdomain
+        functions:
+          type: array
+          items:
+            type: string
+          description: List of function IDs assigned to this subdomain
+        classes:
+          type: array
+          items:
+            type: string
+          description: List of class IDs assigned to this subdomain
+      required:
+        - name
+        - descriptionSummary
+        - files
+        - functions
+        - classes
+    DomainRelationship:
+      type: object
+      properties:
+        from:
+          type: string
+          description: Source domain or subdomain name/id
+        to:
+          type: string
+          description: Target domain or subdomain name/id
+        type:
+          type: string
+          description: Relationship type (e.g., aggregates, dependsOn, relatesTo)
+        strength:
+          type: number
+          description: Numeric strength/weight (0-1 or small integer)
+        reason:
+          type: string
+          description: Optional explanation for the relationship
+      required:
+        - from
+        - to
+        - type
+        - strength
+    DomainFileAssignment:
+      type: object
+      properties:
+        filePath:
+          type: string
+          description: Repository-relative file path
+        domainName:
+          type: string
+          description: Assigned domain
+      required:
+        - filePath
+        - domainName
+    DomainFunctionAssignment:
+      type: object
+      properties:
+        functionId:
+          type: string
+          description: Stable function identifier (matching codegraph/function models)
+        subdomainName:
+          type: string
+          description: Subdomain assigned to the function
+        parentDomain:
+          type: string
+          description: Optional parent domain containing the subdomain
+      required:
+        - functionId
+        - subdomainName
+    UnassignedFunction:
+      type: object
+      properties:
+        functionId:
+          type: string
+          description: Function that could not be assigned
+        reason:
+          type: string
+          description: Reason it was left unassigned
+      required:
+        - functionId
+        - reason
+    DomainClassAssignment:
+      type: object
+      properties:
+        classId:
+          type: string
+          description: Class identifier
+        domainName:
+          type: string
+          description: Assigned domain
+      required:
+        - classId
+        - domainName
+    FunctionDescription:
+      type: object
+      properties:
+        functionId:
+          type: string
+          description: Function identifier
+        descriptionSummary:
+          type: string
+          description: Short summary of behavior
+        domainName:
+          type: string
+          description: Optional domain/subdomain association
+      required:
+        - functionId
+        - descriptionSummary
+    ClassificationStats:
+      type: object
+      properties:
+        nodeCount:
+          type: integer
+          format: int64
+          description: Total number of nodes in the graph
+        relationshipCount:
+          type: integer
+          format: int64
+          description: Total number of relationships in the graph
+        nodeTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of nodes by type
+        relationshipTypes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of relationships by type
+        domainCount:
+          type: integer
+          description: Number of domains discovered
+        subdomainCount:
+          type: integer
+          description: Number of subdomains discovered
+        assignedFileCount:
+          type: integer
+          description: Number of files assigned to domains/subdomains
+        assignedFunctionCount:
+          type: integer
+          description: Number of functions assigned to domains/subdomains
+        assignedClassCount:
+          type: integer
+          description: Number of classes assigned to domains/subdomains
+        fileAssignments:
+          type: integer
+          description: Count of file assignments
+        functionAssignments:
+          type: integer
+          description: Count of function assignments
+        unassignedFunctions:
+          type: integer
+          description: Count of unassigned functions
+        classAssignments:
+          type: integer
+          description: Count of class assignments
+      required:
+        - nodeCount
+        - relationshipCount
+        - nodeTypes
+        - relationshipTypes
+        - domainCount
+        - subdomainCount
+        - assignedFileCount
+        - assignedFunctionCount
+        - assignedClassCount
+        - fileAssignments
+        - functionAssignments
+        - unassignedFunctions
+        - classAssignments
