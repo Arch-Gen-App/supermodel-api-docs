@@ -33,6 +33,12 @@
               "async-polling",
               "concepts"
             ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "prompt-library"
+            ]
           }
         ]
       },

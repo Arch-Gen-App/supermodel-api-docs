@@ -1,0 +1,325 @@
+---
+title: 'Prompt Library'
+description: 'Copy-paste prompts to get started with every Supermodel tool and use case'
+icon: 'book-open'
+---
+
+This library gives you ready-to-use prompts for every tool in the Supermodel ecosystem. Copy any prompt into your AI coding assistant, CI pipeline, or terminal to get started immediately.
+
+---
+
+## MCP Server
+
+The [Supermodel MCP server](https://github.com/supermodeltools/mcp) gives AI coding agents instant, sub-second access to your codebase's call graph, dependency graph, and domain structure — without loading files into context.
+
+<AccordionGroup>
+  <Accordion title="Understand an unfamiliar codebase">
+    ```
+    I just cloned this repo and need to get up to speed. Use the Supermodel MCP tools to give me an architectural overview: what are the major domains, which files are the most depended-on, and what are the key entry points?
+    ```
+  </Accordion>
+
+  <Accordion title="Trace a call chain">
+    ```
+    Use Supermodel to trace the full call chain starting from the `handleRequest` function. Show me every function it calls, and every function those call, up to 3 levels deep.
+    ```
+  </Accordion>
+
+  <Accordion title="Find who calls a function (callers)">
+    ```
+    Before I rename or change the signature of `parseConfig`, use Supermodel to find every function that calls it so I know the full blast radius of this change.
+    ```
+  </Accordion>
+
+  <Accordion title="Discover related symbols in a file">
+    ```
+    Use Supermodel to show me all the symbols defined in `src/auth/middleware.ts` and how they relate to each other.
+    ```
+  </Accordion>
+
+  <Accordion title="Identify subsystem boundaries">
+    ```
+    Use Supermodel's domain graph tools to show me the subsystem boundaries in this codebase. Which modules are tightly coupled and which are cleanly separated?
+    ```
+  </Accordion>
+
+  <Accordion title="Impact analysis before a refactor">
+    ```
+    I'm planning to refactor the `UserService` class. Use Supermodel to map everything that depends on it — direct callers, transitive dependents, and which domains it crosses — so we can plan the rollout safely.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## TypeScript SDK
+
+The [TypeScript SDK](https://github.com/supermodeltools/typescript-sdk) (`@supermodeltools/sdk`) wraps the Supermodel API with automatic async polling, ZIP compression, and full type definitions.
+
+<AccordionGroup>
+  <Accordion title="Generate a dependency graph from a local repo">
+    ```
+    Write a Node.js script using @supermodeltools/sdk that zips the current directory, submits it to the Supermodel dependency graph endpoint, polls until the job completes, and writes the result to dependency-graph.json.
+    ```
+  </Accordion>
+
+  <Accordion title="Generate a call graph">
+    ```
+    Using @supermodeltools/sdk, generate a call graph for the repo at ./my-project. Log progress to the console and handle errors gracefully. Save the final graph as call-graph.json.
+    ```
+  </Accordion>
+
+  <Accordion title="Generate a domain graph">
+    ```
+    Write a script with @supermodeltools/sdk that generates a domain graph for my codebase and prints a summary of all discovered domains and the files that belong to each one.
+    ```
+  </Accordion>
+
+  <Accordion title="Run all graph types and save results">
+    ```
+    Using @supermodeltools/sdk, submit my repo to all five Supermodel endpoints (dependency, call, domain, parse, supermodel) in parallel, wait for all to complete, and save each result to its own JSON file in an ./analysis directory.
+    ```
+  </Accordion>
+
+  <Accordion title="Add Supermodel analysis to a CI pipeline">
+    ```
+    Write a Node.js script for our GitHub Actions CI that uses @supermodeltools/sdk to generate a supermodel graph of the changed files on every pull request. The SUPERMODEL_API_KEY should come from an environment variable. Exit with code 1 if the API call fails.
+    ```
+  </Accordion>
+
+  <Accordion title="Use abort signals for timeout control">
+    ```
+    Show me how to use @supermodeltools/sdk with an AbortSignal so the graph generation job automatically cancels if it takes longer than 60 seconds.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Direct API (curl)
+
+Use these prompts to interact with the [Supermodel API](https://api.supermodeltools.com) directly from your terminal.
+
+<AccordionGroup>
+  <Accordion title="Submit a dependency graph job">
+    ```
+    Show me the curl command to zip my current directory (excluding .git and node_modules), submit it to the Supermodel dependency graph endpoint with my API key, and save the jobId from the response.
+    ```
+  </Accordion>
+
+  <Accordion title="Poll for job completion">
+    ```
+    Write a bash loop that polls the Supermodel API with the same idempotency key every 10 seconds until the job status is "completed", then pretty-prints the result with jq.
+    ```
+  </Accordion>
+
+  <Accordion title="Generate a call graph via curl">
+    ```
+    Give me the curl command to submit a call graph job to the Supermodel API at /v1/graphs/call with my API key and a zipped repo file.
+    ```
+  </Accordion>
+
+  <Accordion title="Parse a repo into an AST representation">
+    ```
+    Show me how to use curl to submit my repo to the Supermodel /v1/graphs/parse endpoint and retrieve the structured AST output.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## arch-docs GitHub Action
+
+The [arch-docs action](https://github.com/supermodeltools/arch-docs) auto-generates a full static architecture documentation website from your codebase on every push.
+
+<AccordionGroup>
+  <Accordion title="Add arch-docs to a repo">
+    ```
+    Add the supermodeltools/arch-docs GitHub Action to this repo so it generates and publishes an architecture documentation site to GitHub Pages on every push to main. The API key should come from a SUPERMODEL_API_KEY secret.
+    ```
+  </Accordion>
+
+  <Accordion title="Generate docs on pull requests">
+    ```
+    Set up the arch-docs GitHub Action to generate an architecture documentation preview on every pull request and post the site URL as a PR comment.
+    ```
+  </Accordion>
+
+  <Accordion title="Customize the output directory">
+    ```
+    Configure the supermodeltools/arch-docs action to output the generated site into a ./docs/architecture directory instead of the default location.
+    ```
+  </Accordion>
+
+  <Accordion title="Use arch-docs outputs in a downstream step">
+    ```
+    Show me how to use the arch-docs action outputs (site_path, entity_count, page_count) in a subsequent GitHub Actions step to print a summary to the job log.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## dead-code-hunter GitHub Action
+
+The [dead-code-hunter action](https://github.com/supermodeltools/dead-code-hunter) uses Supermodel's static analysis to detect unreachable functions, unused exports, and orphaned files on every pull request.
+
+<AccordionGroup>
+  <Accordion title="Add dead code detection to PRs">
+    ```
+    Add the supermodeltools/dead-code-hunter GitHub Action to this repo so it runs on every pull request, posts findings as a PR comment, and fails the check if any high-confidence dead code is found.
+    ```
+  </Accordion>
+
+  <Accordion title="Set a failure threshold">
+    ```
+    Configure dead-code-hunter to fail the CI check only when there are more than 5 high-confidence dead code findings. Lower-confidence findings should be reported but not block merging.
+    ```
+  </Accordion>
+
+  <Accordion title="Ignore generated or vendored files">
+    ```
+    Set up dead-code-hunter with ignore patterns so it skips files matching **/generated/**, **/vendor/**, and **/*.pb.go.
+    ```
+  </Accordion>
+
+  <Accordion title="Run dead code detection on a schedule">
+    ```
+    Configure dead-code-hunter as a scheduled GitHub Actions workflow that runs every Monday morning and opens a GitHub issue with the findings if any dead code is detected.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## bigiron — Autonomous SDLC
+
+[bigiron](https://github.com/supermodeltools/bigiron) is an autonomous software development lifecycle system that uses Supermodel code graphs to plan, validate, and implement changes across an 8-phase cycle.
+
+<AccordionGroup>
+  <Accordion title="Run a full autonomous development cycle">
+    ```
+    Use bigiron's `factory run` command to implement the following feature: [describe your feature]. Before you start, run a health check so I can see the current state of the codebase.
+    ```
+  </Accordion>
+
+  <Accordion title="Check codebase health before a change">
+    ```
+    Run `factory health` on this repo and give me a report on structural risks, overly coupled modules, and any subsystems that look like they need attention before I start adding new features.
+    ```
+  </Accordion>
+
+  <Accordion title="Automated refactoring with architectural guardrails">
+    ```
+    Run `factory improve` on this codebase. Focus on reducing coupling between the auth and billing subsystems. Don't touch anything in the /legacy directory.
+    ```
+  </Accordion>
+
+  <Accordion title="Blast radius analysis before implementation">
+    ```
+    Before bigiron implements this change, use the call and dependency graphs to show me which existing tests will need to be updated and which modules are in the blast radius.
+    ```
+  </Accordion>
+
+  <Accordion title="Validate new code against existing architecture">
+    ```
+    I've drafted a new `PaymentProcessor` class. Before we write any more code, use bigiron to validate that it fits the existing architecture and doesn't introduce circular dependencies or cross-domain violations.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## mcpbr — MCP Benchmark Runner
+
+[mcpbr](https://github.com/supermodeltools/mcpbr) measures whether an MCP server actually improves LLM agent performance using controlled A/B comparisons against SWE-bench tasks.
+
+<AccordionGroup>
+  <Accordion title="Run a baseline benchmark">
+    ```
+    Set up mcpbr and run the baseline benchmark suite for the Supermodel MCP server — one run with the MCP tools enabled and one without — and show me the performance comparison.
+    ```
+  </Accordion>
+
+  <Accordion title="Add benchmark regression detection to CI">
+    ```
+    Add mcpbr to our GitHub Actions CI workflow so it runs benchmarks on every MCP server release and exits with code 1 if performance drops more than 10% compared to the previous run.
+    ```
+  </Accordion>
+
+  <Accordion title="Run benchmarks in Docker for reproducibility">
+    ```
+    Show me how to run the full mcpbr benchmark suite inside Docker with pinned dependencies so results are reproducible across machines.
+    ```
+  </Accordion>
+
+  <Accordion title="Send benchmark results to Slack">
+    ```
+    Configure mcpbr to post benchmark results and any detected regressions to our #eng-alerts Slack channel after each run.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Uncompact — Context Reinjection for Claude Code
+
+[Uncompact](https://github.com/supermodeltools/Uncompact) automatically reinjects Supermodel architectural context back into Claude Code sessions after compaction events, keeping AI reasoning sharp across long sessions.
+
+<AccordionGroup>
+  <Accordion title="Install and configure Uncompact">
+    ```
+    Install the Uncompact Claude Code plugin for this repo and configure it with my Supermodel API key so that architectural context is automatically reinjected after every compaction event.
+    ```
+  </Accordion>
+
+  <Accordion title="Adjust the token budget">
+    ```
+    Configure Uncompact to use a 3,000-token budget for reinjected context instead of the default 2,000 tokens, so more architectural detail is preserved after compaction.
+    ```
+  </Accordion>
+
+  <Accordion title="Check what context was reinjected">
+    ```
+    After the last compaction event, what architectural context did Uncompact reinject? Summarize the domains, key entry points, and cross-subsystem relationships that were restored.
+    ```
+  </Accordion>
+
+  <Accordion title="Debug a degraded session after compaction">
+    ```
+    My Claude Code session seems to have lost track of the codebase architecture after a compaction. Use Uncompact to reinject the Supermodel context now and then re-summarize the current task with full architectural awareness.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Cross-Tool Workflows
+
+Prompts that combine multiple Supermodel tools together.
+
+<AccordionGroup>
+  <Accordion title="Full onboarding workflow for a new codebase">
+    ```
+    I just joined this project. Use the Supermodel MCP server to give me an architectural overview, then generate an arch-docs site I can share with my team, and finally run a dead code check so we know what's safe to clean up.
+    ```
+  </Accordion>
+
+  <Accordion title="Pre-merge review pipeline">
+    ```
+    Before merging this PR: (1) use Supermodel to check the blast radius of the changed functions, (2) run dead-code-hunter to see if any of the changes introduced orphaned code, and (3) check if the changes cross any domain boundaries that weren't crossed before.
+    ```
+  </Accordion>
+
+  <Accordion title="Set up a fully automated code quality pipeline">
+    ```
+    Set up a GitHub Actions workflow that runs on every PR and does the following in parallel: generates a fresh arch-docs site, runs dead-code-hunter and posts findings as a comment, and uses the TypeScript SDK to diff the dependency graph against the base branch.
+    ```
+  </Accordion>
+
+  <Accordion title="Autonomous refactor with safety checks">
+    ```
+    Use bigiron to refactor the data-access layer to remove all direct database calls from the API route handlers. Before each file change, use the Supermodel MCP tools to verify we're not breaking any callers. After the refactor, run dead-code-hunter to confirm no orphaned code was left behind.
+    ```
+  </Accordion>
+</AccordionGroup>
