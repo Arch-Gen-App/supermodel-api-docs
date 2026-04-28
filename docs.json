@@ -65,6 +65,11 @@
       "href": "https://dashboard.supermodeltools.com/"
     }
   },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-TJEXTLZLVL"
+    }
+  },
   "footer": {
     "socials": {
       "x": "https://x.com/supermodeltools",
