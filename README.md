@@ -14,7 +14,7 @@ If this is useful, please star our tools — it helps us grow:
 
 ## Get an API key
 
-Get your API key from the [Supermodel Dashboard](https://dashboard.supermodeltools.com/) and send it in the `X-Api-Key` header.
+Start a free trial at [supermodeltools.com/trial](https://supermodeltools.com/trial) to get your API key. Send it in the `X-Api-Key` header.
 
 ## Quickstart
 
