@@ -1,0 +1,96 @@
+---
+title: 'Quickstart'
+description: 'Generate graph files and let your agent read them'
+icon: 'bolt'
+---
+
+This guide walks you from a fresh install to your agent reading graph data about every file in your repo.
+
+## Prerequisites
+
+1. The CLI [installed](/cli/install).
+2. A Supermodel account — sign up at the [Dashboard](https://dashboard.supermodeltools.com/).
+3. A local repository to analyze.
+
+## Step 1: Authenticate
+
+```bash
+supermodel login
+```
+
+This opens your browser, creates an API key, and saves it to `~/.supermodel/config.yaml`. For CI, pass the key directly:
+
+```bash
+supermodel login --token smsk_live_...
+```
+
+## Step 2: Generate graph files
+
+Run a one-shot analysis with the recommended three-file shard format:
+
+```bash
+cd /path/to/your/repo
+supermodel analyze --three-file
+```
+
+This uploads your repo, builds the graph, and writes three sidecar files next to every source file:
+
+```
+src/cache.go  →  src/cache.calls.go    # who calls what, with file:line
+              →  src/cache.deps.go     # imports and imported-by
+              →  src/cache.impact.go   # risk level, domains, blast radius
+```
+
+<Tip>
+  The three-file format is **68% faster** in benchmarks than a single combined `.graph` file because grep hits are more targeted.
+</Tip>
+
+## Step 3: Tell your agent the files exist
+
+Append the agent awareness prompt to your agent's instructions file:
+
+```bash
+supermodel skill >> CLAUDE.md
+# or
+supermodel skill >> AGENTS.md
+```
+
+That's it. The next time your agent edits code in this repo, it will read the relevant `.calls.*`, `.deps.*`, and `.impact.*` files via its normal file-reading tools.
+
+## Step 4: Keep the graph fresh
+
+Run the bare command to enter watch/daemon mode. It does a full generate on startup (using the cache when possible), then incrementally re-renders affected files as you code:
+
+```bash
+supermodel
+```
+
+For Claude Code, install the `PostToolUse` hook so each `Write`/`Edit` triggers an incremental update — the [setup wizard](/cli/install#first-time-setup) does this for you, or add it manually to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{ "type": "command", "command": "supermodel hook" }]
+    }]
+  }
+}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="File mode in depth" icon="folder-tree" href="/cli/file-mode">
+    Watch daemon, three-file shards, the `skill` prompt, and cleanup.
+  </Card>
+  <Card title="Connect your agent" icon="robot" href="/cli/agents">
+    Setup notes for Claude Code, Cursor, Copilot, Windsurf, Aider, and MCP.
+  </Card>
+  <Card title="Command reference" icon="terminal" href="/cli/commands">
+    Every command, flag, and alias.
+  </Card>
+  <Card title="Configuration" icon="gear" href="/cli/configuration">
+    Config file, env vars, and CI-friendly defaults.
+  </Card>
+</CardGroup>

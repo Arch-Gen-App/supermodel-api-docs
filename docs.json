@@ -43,6 +43,33 @@
         ]
       },
       {
+        "tab": "CLI",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "cli/overview",
+              "cli/install",
+              "cli/quickstart"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "cli/file-mode",
+              "cli/agents",
+              "cli/configuration"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "cli/commands"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "openapi": "/openapi.yaml"
       }

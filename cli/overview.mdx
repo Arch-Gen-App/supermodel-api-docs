@@ -1,0 +1,57 @@
+---
+title: 'Overview'
+description: 'The Supermodel CLI gives your AI agent a map of your codebase'
+icon: 'terminal'
+---
+
+The Supermodel CLI maps every file, function, and call relationship in your repo, then writes plain-text `.graph.*` sidecar files next to each source file. Your agent picks them up automatically through its normal file-reading tools — no prompt changes, no extra context windows, no agent-specific integration.
+
+```bash
+curl -fsSL https://supermodeltools.com/install.sh | sh
+```
+
+<Info>
+  The CLI is the local complement to the [Supermodel API](/index). The CLI calls the same API under the hood, caches results by content hash, and renders them into formats your agent can read.
+</Info>
+
+## How it works
+
+<Steps>
+  <Step title="Map your codebase">
+    Running `supermodel` (the bare command) uploads your repo to the Supermodel API, builds a full call graph, and writes `.graph.*` files next to every source file. It stays running and updates files incrementally as you code.
+  </Step>
+  <Step title="Your agent reads the graph">
+    `.graph.*` files are plain text. Any agent that can read files — Claude Code, Cursor, Copilot, Windsurf, Aider — picks them up automatically through `cat` and `grep`.
+  </Step>
+  <Step title="Ask anything">
+    Your agent now has full visibility into your call graph, imports, domains, and blast radius — for every file in the repo, not just the ones open in the editor.
+  </Step>
+</Steps>
+
+## What you can do with it
+
+<CardGroup cols={2}>
+  <Card title="Generate graph sidecars" icon="diagram-project" href="/cli/file-mode">
+    Write `.calls`, `.deps`, and `.impact` files next to each source file so any agent can read them.
+  </Card>
+  <Card title="Find dead code" icon="ghost" href="/cli/commands#dead-code">
+    Static analysis surfaces unreachable functions with confidence levels and explanations.
+  </Card>
+  <Card title="Analyze blast radius" icon="bomb" href="/cli/commands#blast-radius">
+    See which files and functions a change will impact before you merge it.
+  </Card>
+  <Card title="Run as an MCP server" icon="plug" href="/cli/agents#mcp">
+    Expose graph tools to Claude Code or any MCP host via stdio.
+  </Card>
+</CardGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Install" icon="download" href="/cli/install">
+    Brew, curl, npm, or build from source.
+  </Card>
+  <Card title="Quickstart" icon="bolt" href="/cli/quickstart">
+    Authenticate and generate your first graph in under a minute.
+  </Card>
+</CardGroup>
