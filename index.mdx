@@ -3,21 +3,127 @@ title: Introduction
 description: 'Welcome to the Supermodel API documentation'
 ---
 
+## Documentation Index
+
+Fetch the complete documentation index at: [https://docs.supermodeltools.com/llms.txt](https://docs.supermodeltools.com/llms.txt)
+
+Use this file to discover all available pages before exploring further.
+
 ## Welcome
 
 Supermodel provides a unified graph representation of your codebase, enabling powerful analysis and visualization tools.
 
-<Info>
-  **Try the API Playground**: Each endpoint in our API Reference includes an interactive playground. To use it, you'll need an API key from the [Supermodel Dashboard](https://dashboard.supermodeltools.com/).
-</Info>
-
-## Where to start
+Two ways to use it:
 
 <CardGroup cols={2}>
-  <Card title="API Reference" icon="code" href="/api-reference">
-    View the OpenAPI specification and endpoints.
+  <Card title="API" icon="code" href="/api-reference">
+    Hit the endpoints directly. Best for SDKs, services, and CI integrations.
   </Card>
   <Card title="CLI" icon="terminal" href="/cli/install">
-    Install the Supermodel CLI and start analyzing repositories from your terminal.
+    A local binary that analyzes your repo and writes graph sidecars next to your source files. Best for day-to-day work in the terminal.
   </Card>
 </CardGroup>
+
+## CLI quickstart
+
+The fastest path: install the binary and run `setup`. The wizard authenticates you, detects your repo, offers to install the Claude Code hook, and starts the watch daemon — one command, end to end.
+
+### 1. Install
+
+```bash
+curl -fsSL https://supermodeltools.com/install.sh | sh
+```
+
+Other options: `brew install supermodeltools/tap/supermodel`, `npm install -g @supermodeltools/cli`, or build from source. See [Installation](/cli/install).
+
+### 2. Run the setup wizard
+
+```bash
+cd /path/to/your/repo
+supermodel setup
+```
+
+The wizard walks four steps:
+
+1. **Authentication** — opens your browser to create an API key and saves it to `~/.supermodel/config.yaml`.
+2. **Repository** — detects the git root and confirms the directory.
+3. **Agent hook** — if Claude Code is installed, offers to add a `PostToolUse` hook so `.graph.*` files refresh on every `Write`/`Edit`. Cursor, Copilot, Windsurf, and Aider read the files directly — no hook needed.
+4. **Shard mode** — enables writing `.graph.*` sidecars next to your source files.
+
+It then runs the watch daemon for you. Press `Ctrl+C` to stop.
+
+### 3. Tell your agent the sidecars exist
+
+Pipe the awareness prompt into your agent's instructions file:
+
+```bash
+supermodel skill >> CLAUDE.md
+# or AGENTS.md, .cursorrules, etc.
+```
+
+The prompt explains the naming convention (`Foo.py` → `Foo.graph.py`), the three sections inside each sidecar (`[deps]`, `[calls]`, `[impact]`), and tells the agent to read the sidecar before the source file.
+
+### 4. What you get
+
+After setup runs with `--three-file` (recommended), each source file gets three sidecars:
+
+```
+src/
+├── login.go
+├── login.calls.go     ← who calls what, with file:line
+├── login.deps.go      ← imports and imported-by
+└── login.impact.go    ← risk level, domains, blast radius
+```
+
+Real output from running the CLI on its own source (`cmd/login.*.go`):
+
+```go
+// cmd/login.deps.go
+// [deps]
+// imports     internal/auth/doc.go
+// imports     internal/auth/handler.go
+// imported-by main.go
+
+// cmd/login.calls.go
+// [calls]
+// init → LoginWithToken    internal/auth/handler.go:109
+// init → Login             internal/auth/handler.go:29
+
+// cmd/login.impact.go
+// [impact]
+// risk        MEDIUM
+// domains     CoreConfig · SupermodelAPI
+// direct      1
+// transitive  1
+// affects     main.go
+```
+
+Your agent reads these via `cat` and `grep` like any other file. No prompt changes, no extra context windows.
+
+### 5. Keep it running
+
+The bare `supermodel` command is the watch daemon. Run it any time you want sidecars to stay fresh as you code:
+
+```bash
+supermodel
+```
+
+For one-shot analysis (no daemon), use:
+
+```bash
+supermodel analyze --three-file
+```
+
+### 6. What to do with the graph
+
+Once a graph is cached, every other command reuses it instantly:
+
+| Goal | Command |
+|---|---|
+| Find unreachable functions | `supermodel dead-code` |
+| See what a change impacts | `supermodel blast-radius path/to/file.go` |
+| Codebase health report | `supermodel audit` |
+| Find usages of a symbol | `supermodel find handleRequest` |
+| Token-efficient context for one file | `supermodel focus path/to/file.go` |
+
+See the [command reference](/cli/commands/analyze) for every flag and example.
