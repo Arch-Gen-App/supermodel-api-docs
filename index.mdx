@@ -52,38 +52,55 @@ The wizard walks four steps:
 
 It then runs the watch daemon for you. Press `Ctrl+C` to stop.
 
-### 3. What you get
+### 3. Tell your agent the sidecars exist
 
-After setup runs, every source file has a sidecar with its call graph, dependencies, and blast-radius data:
+Pipe the awareness prompt into your agent's instructions file:
+
+```bash
+supermodel skill >> CLAUDE.md
+# or AGENTS.md, .cursorrules, etc.
+```
+
+The prompt explains the naming convention (`Foo.py` → `Foo.graph.py`), the three sections inside each sidecar (`[deps]`, `[calls]`, `[impact]`), and tells the agent to read the sidecar before the source file.
+
+### 4. What you get
+
+After setup runs with `--three-file` (recommended), each source file gets three sidecars:
 
 ```
 src/
 ├── login.go
-├── login.graph.go     ← generated
-├── client.go
-└── client.graph.go    ← generated
+├── login.calls.go     ← who calls what, with file:line
+├── login.deps.go      ← imports and imported-by
+└── login.impact.go    ← risk level, domains, blast radius
 ```
 
-A real sidecar (excerpt from `cmd/login.graph.go` in the CLI repo itself):
+Real output from running the CLI on its own source (`cmd/login.*.go`):
 
 ```go
-//go:build ignore
-package ignore
-// @generated supermodel-shard — do not edit
+// cmd/login.deps.go
 // [deps]
+// imports     internal/auth/doc.go
 // imports     internal/auth/handler.go
 // imported-by main.go
+
+// cmd/login.calls.go
 // [calls]
-// init → Login    internal/auth/handler.go:29
+// init → LoginWithToken    internal/auth/handler.go:109
+// init → Login             internal/auth/handler.go:29
+
+// cmd/login.impact.go
 // [impact]
-// risk        LOW
-// domains     CLI
+// risk        MEDIUM
+// domains     CoreConfig · SupermodelAPI
+// direct      1
+// transitive  1
 // affects     main.go
 ```
 
 Your agent reads these via `cat` and `grep` like any other file. No prompt changes, no extra context windows.
 
-### 4. Keep it running
+### 5. Keep it running
 
 The bare `supermodel` command is the watch daemon. Run it any time you want sidecars to stay fresh as you code:
 
@@ -94,10 +111,10 @@ supermodel
 For one-shot analysis (no daemon), use:
 
 ```bash
-supermodel analyze
+supermodel analyze --three-file
 ```
 
-### 5. What to do with the graph
+### 6. What to do with the graph
 
 Once a graph is cached, every other command reuses it instantly:
 
