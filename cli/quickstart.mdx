@@ -1,96 +1,54 @@
 ---
 title: 'Quickstart'
-description: 'Generate graph files and let your agent read them'
+description: 'Authenticate and run your first analysis'
 icon: 'bolt'
 ---
 
-This guide walks you from a fresh install to your agent reading graph data about every file in your repo.
-
-## Prerequisites
-
-1. The CLI [installed](/cli/install).
-2. A Supermodel account — sign up at the [Dashboard](https://dashboard.supermodeltools.com/).
-3. A local repository to analyze.
-
-## Step 1: Authenticate
+## 1. Authenticate
 
 ```bash
 supermodel login
 ```
 
-This opens your browser, creates an API key, and saves it to `~/.supermodel/config.yaml`. For CI, pass the key directly:
+Opens your browser, creates an API key, and saves it to `~/.supermodel/config.yaml`. For CI, pass the key directly:
 
 ```bash
 supermodel login --token smsk_live_...
 ```
 
-## Step 2: Generate graph files
-
-Run a one-shot analysis with the recommended three-file shard format:
+## 2. Analyze a repo
 
 ```bash
 cd /path/to/your/repo
-supermodel analyze --three-file
+supermodel analyze
 ```
 
-This uploads your repo, builds the graph, and writes three sidecar files next to every source file:
+Uploads the repo, runs call graph + dependency + domain analysis, caches the result locally by content hash, and writes `.graph.*` sidecar files next to each source file.
 
-```
-src/cache.go  →  src/cache.calls.go    # who calls what, with file:line
-              →  src/cache.deps.go     # imports and imported-by
-              →  src/cache.impact.go   # risk level, domains, blast radius
-```
+## 3. Use the results
 
-<Tip>
-  The three-file format is **68% faster** in benchmarks than a single combined `.graph` file because grep hits are more targeted.
-</Tip>
+| Goal | Command |
+|---|---|
+| Find unreachable functions | `supermodel dead-code` |
+| See what a change impacts | `supermodel blast-radius path/to/file.go` |
+| Codebase health report | `supermodel audit` |
+| Find usages of a symbol | `supermodel find handleRequest` |
+| Token-efficient context for one file | `supermodel focus path/to/file.go` |
+| Print the full graph | `supermodel graph` |
 
-## Step 3: Tell your agent the files exist
+Subsequent commands reuse the cached graph automatically. Pass `--force` to any command to bypass the cache.
 
-Append the agent awareness prompt to your agent's instructions file:
+## 4. Configure (optional)
 
-```bash
-supermodel skill >> CLAUDE.md
-# or
-supermodel skill >> AGENTS.md
-```
+Settings live at `~/.supermodel/config.yaml`. Environment variables override file values.
 
-That's it. The next time your agent edits code in this repo, it will read the relevant `.calls.*`, `.deps.*`, and `.impact.*` files via its normal file-reading tools.
-
-## Step 4: Keep the graph fresh
-
-Run the bare command to enter watch/daemon mode. It does a full generate on startup (using the cache when possible), then incrementally re-renders affected files as you code:
-
-```bash
-supermodel
+```yaml
+api_key: smsk_live_...                       # or SUPERMODEL_API_KEY
+api_base: https://api.supermodeltools.com    # or SUPERMODEL_API_BASE
+output: human                                # human | json
+files: true                                  # set false (or SUPERMODEL_FILES=false) to skip writing sidecars
 ```
 
-For Claude Code, install the `PostToolUse` hook so each `Write`/`Edit` triggers an incremental update — the [setup wizard](/cli/install#first-time-setup) does this for you, or add it manually to `.claude/settings.json`:
+## Next
 
-```json
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "Write|Edit",
-      "hooks": [{ "type": "command", "command": "supermodel hook" }]
-    }]
-  }
-}
-```
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="File mode in depth" icon="folder-tree" href="/cli/file-mode">
-    Watch daemon, three-file shards, the `skill` prompt, and cleanup.
-  </Card>
-  <Card title="Connect your agent" icon="robot" href="/cli/agents">
-    Setup notes for Claude Code, Cursor, Copilot, Windsurf, Aider, and MCP.
-  </Card>
-  <Card title="Command reference" icon="terminal" href="/cli/commands">
-    Every command, flag, and alias.
-  </Card>
-  <Card title="Configuration" icon="gear" href="/cli/configuration">
-    Config file, env vars, and CI-friendly defaults.
-  </Card>
-</CardGroup>
+See the [command reference](/cli/commands/analyze) for every command, flag, and example.

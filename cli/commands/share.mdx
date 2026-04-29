@@ -1,0 +1,26 @@
+---
+title: 'share'
+description: 'Upload your codebase health report and get a public URL'
+---
+
+Runs a health audit and uploads the report to supermodeltools.com, returning a short public URL you can share or embed as a README badge.
+
+## Synopsis
+
+```bash
+supermodel share [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--dir` | Project directory (default: cwd) |
+| `-h, --help` | Help for share |
+
+## Examples
+
+```bash
+supermodel share
+supermodel share --dir ./path/to/project
+```

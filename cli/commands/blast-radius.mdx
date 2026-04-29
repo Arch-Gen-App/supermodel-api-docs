@@ -1,0 +1,45 @@
+---
+title: 'blast-radius'
+description: 'Analyze the impact of changing a file or function'
+---
+
+Uploads the repository to the Supermodel API and runs impact analysis using call graph and dependency graph reachability. Results include risk scoring, affected files and functions, and entry points that would be impacted by changes to the target.
+
+**Aliases:** `br`, `impact`
+
+## Synopsis
+
+```bash
+supermodel blast-radius [file...] [flags]
+```
+
+Three usage modes:
+
+```bash
+supermodel blast-radius <file>              # analyze a specific file
+supermodel blast-radius --diff changes.diff # analyze from a git diff
+supermodel blast-radius                     # global coupling map
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--diff` | Path to a unified diff file (git diff output) |
+| `--force` | Re-analyze even if a cached result exists |
+| `-o, --output` | Output format: `human` \| `json` |
+| `-h, --help` | Help for blast-radius |
+
+## Examples
+
+```bash
+# Impact of changing one file
+supermodel blast-radius internal/api/client.go
+
+# Impact of a pending PR
+git diff main...HEAD > /tmp/pr.diff
+supermodel blast-radius --diff /tmp/pr.diff
+
+# Global coupling map (no target)
+supermodel blast-radius -o json
+```

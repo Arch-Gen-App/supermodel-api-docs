@@ -1,0 +1,32 @@
+---
+title: 'audit'
+description: 'Codebase health report from graph intelligence'
+---
+
+Analyses the codebase via the Supermodel API and produces a structured Markdown health report covering:
+
+- Overall status (HEALTHY / DEGRADED / CRITICAL)
+- Circular dependency detection
+- Domain coupling metrics and high-coupling domains
+- High blast-radius files
+- Prioritised recommendations
+
+## Synopsis
+
+```bash
+supermodel audit [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--dir` | Project directory (default: current working directory) |
+| `-h, --help` | Help for audit |
+
+## Examples
+
+```bash
+supermodel audit
+supermodel audit --dir ./path/to/project
+```

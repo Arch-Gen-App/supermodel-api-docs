@@ -1,0 +1,37 @@
+---
+title: 'graph'
+description: 'Display the repository graph'
+---
+
+Fetches or loads the cached graph and renders it in one of three formats:
+
+- `human` — aligned table of nodes (default)
+- `json` — full graph as JSON
+- `dot` — Graphviz DOT for use with `dot`/`graphviz`
+
+## Synopsis
+
+```bash
+supermodel graph [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--label` | Filter nodes by label (`File`, `Function`, `Class`, …) |
+| `--force` | Re-analyze even if a cached result exists |
+| `-o, --output` | Output format: `human` \| `json` \| `dot` (default `human`) |
+| `-h, --help` | Help for graph |
+
+## Examples
+
+```bash
+supermodel graph
+
+# Only files
+supermodel graph --label File
+
+# Render with Graphviz
+supermodel graph -o dot | dot -Tsvg > graph.svg
+```

@@ -1,0 +1,38 @@
+---
+title: 'restore'
+description: "Generate a project context summary to restore an agent's understanding"
+---
+
+Builds a high-level project summary (a "context bomb") and writes it to stdout. Use it after Claude Code compacts its context window to re-establish understanding of your codebase structure, domains, and key files.
+
+With an API key configured (run `supermodel login`), `restore` calls the Supermodel API for an AI-powered analysis including semantic domains, external dependencies, and critical file ranking.
+
+Without an API key (or with `--local`), `restore` performs a local scan of the repository file tree and produces a simpler structural summary.
+
+## Synopsis
+
+```bash
+supermodel restore [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--dir` | Project directory (default: cwd) |
+| `--local` | Use local file scan instead of the Supermodel API |
+| `--max-tokens` | Maximum token budget for the output (default `2000`) |
+| `-h, --help` | Help for restore |
+
+## Examples
+
+```bash
+# Pipe into your agent (typical use)
+supermodel restore
+
+# Local-only, no API call
+supermodel restore --local
+
+# Larger budget for big repos
+supermodel restore --max-tokens 4000
+```

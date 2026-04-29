@@ -1,0 +1,40 @@
+---
+title: 'analyze'
+description: 'Upload a repository and run the full analysis pipeline'
+---
+
+Archives the repository, uploads it to the Supermodel API, and runs call graph generation, dependency analysis, and domain classification. Results are cached locally by content hash. Subsequent commands (`dead-code`, `blast-radius`, `graph`) reuse the cache automatically.
+
+By default, `.graph.*` shard files are written next to each source file. Pass `--no-shards` to skip writing graph files.
+
+## Synopsis
+
+```bash
+supermodel analyze [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--three-file` | Generate `.calls`/`.deps`/`.impact` files instead of a single `.graph` |
+| `--no-shards` | Skip writing `.graph.*` shard files |
+| `--force` | Re-analyze even if a cached result exists |
+| `-o, --output` | Output format: `human` \| `json` |
+| `-h, --help` | Help for analyze |
+
+## Examples
+
+```bash
+# Analyze the current directory
+supermodel analyze
+
+# Generate three-file shards (recommended)
+supermodel analyze --three-file
+
+# Re-analyze without using the cache, output JSON
+supermodel analyze --force -o json
+
+# Run analysis without writing sidecar files
+supermodel analyze --no-shards
+```

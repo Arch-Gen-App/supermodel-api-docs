@@ -1,0 +1,40 @@
+---
+title: 'docs'
+description: 'Generate static architecture documentation for a repository'
+---
+
+Generates a static HTML site documenting the architecture of a codebase. The command uploads the repository to the Supermodel API, converts the returned code graph to markdown, and builds a browsable static site with search, dependency graphs, taxonomy navigation, and SEO metadata. The site also emits machine-readable artifacts (JSON-LD and `LLMS.txt`) alongside the HTML.
+
+The output directory can be served locally or deployed to any static host (GitHub Pages, Vercel, Netlify, Cloudflare Pages).
+
+## Synopsis
+
+```bash
+supermodel docs [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `-o, --output` | Output directory (default `./docs-output`) |
+| `--repo` | GitHub repo slug `owner/repo` for source links |
+| `--base-url` | Canonical base URL where the site will be hosted (default `https://example.com`) |
+| `--site-name` | Display title for the generated site (default `<repo> Architecture Docs`) |
+| `--max-entities` | Cap on entity pages (default `12000`, `0` = unlimited) |
+| `--max-source-files` | Cap on source files in analysis (default `3000`, `0` = unlimited) |
+| `--templates-dir` | Override bundled HTML/CSS/JS templates with a custom directory |
+| `--force` | Bypass cache and re-upload even if a cached result exists |
+| `-h, --help` | Help for docs |
+
+## Examples
+
+```bash
+supermodel docs
+
+supermodel docs ./my-project --output ./docs-site
+
+supermodel docs --repo owner/repo --base-url https://owner.github.io/repo
+
+supermodel docs --site-name "My App Docs" --output /var/www/html
+```

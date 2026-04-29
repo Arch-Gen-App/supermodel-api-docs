@@ -1,0 +1,29 @@
+---
+title: 'update'
+description: 'Update supermodel to the latest release'
+---
+
+Checks for a newer release on GitHub and, if found, downloads and installs it. Independent of authentication — works without an API key.
+
+## Synopsis
+
+```bash
+supermodel update [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--check` | Print the latest available version without installing |
+| `-h, --help` | Help for update |
+
+## Examples
+
+```bash
+# Install the latest release
+supermodel update
+
+# Just check
+supermodel update --check
+```

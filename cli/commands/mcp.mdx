@@ -1,0 +1,43 @@
+---
+title: 'mcp'
+description: 'Start the Model Context Protocol server'
+---
+
+Starts a stdio MCP server that exposes Supermodel graph analysis as tools to MCP-compatible hosts.
+
+## Synopsis
+
+```bash
+supermodel mcp [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--repo` | Path to the repository root (default `.`) |
+| `-h, --help` | Help for mcp |
+
+## Exposed tools
+
+| Tool | Description |
+|---|---|
+| `analyze` | Upload repo and run full analysis |
+| `dead_code` | Find functions with no callers |
+| `blast_radius` | Find files affected by a change |
+| `get_graph` | Return a filtered graph slice |
+
+## Example
+
+Add to `~/.claude/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "supermodel": {
+      "command": "supermodel",
+      "args": ["mcp"]
+    }
+  }
+}
+```

@@ -1,0 +1,36 @@
+---
+title: 'find'
+description: 'Find usages and callers of a symbol across the codebase'
+---
+
+Searches the graph for all nodes matching the given symbol name (substring match, case-insensitive) and prints their call relationships.
+
+Similar to "Find Usages" in IDEs — without requiring a language server.
+
+## Synopsis
+
+```bash
+supermodel find <symbol> [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--kind` | Filter by node label: `Function`, `File`, `Class`, … |
+| `--force` | Re-analyze even if cache is fresh |
+| `-o, --output` | Output format: `human` \| `json` |
+| `-h, --help` | Help for find |
+
+## Examples
+
+```bash
+# Find anything containing this name
+supermodel find handleRequest
+
+# Restrict to classes
+supermodel find Client --kind Class
+
+# JSON output for tool consumption
+supermodel find parse -o json
+```

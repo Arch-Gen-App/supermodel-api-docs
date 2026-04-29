@@ -1,0 +1,39 @@
+---
+title: 'dead-code'
+description: 'Find unreachable functions using static analysis'
+---
+
+Uploads the repository to the Supermodel API and runs multi-phase dead code analysis including call graph reachability, entry point detection, and transitive propagation. Results include confidence levels (high/medium/low), line numbers, and explanations for why each function was flagged.
+
+**Aliases:** `dc`
+
+## Synopsis
+
+```bash
+supermodel dead-code [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--min-confidence` | Minimum confidence: `high`, `medium`, or `low` |
+| `--limit` | Maximum number of candidates to return |
+| `--ignore` | Glob pattern to exclude (repeatable, supports `**`) |
+| `--timeout` | Maximum seconds to wait (default `7200`, `0` = no limit) |
+| `--force` | Re-analyze even if a cached result exists |
+| `-o, --output` | Output format: `human` \| `json` |
+| `-h, --help` | Help for dead-code |
+
+## Examples
+
+```bash
+# High-confidence candidates only
+supermodel dead-code --min-confidence high
+
+# Top 20 results, JSON output
+supermodel dead-code --limit 20 -o json
+
+# Skip vendored and generated code
+supermodel dead-code --ignore '**/vendor/**' --ignore '**/*_pb.go'
+```

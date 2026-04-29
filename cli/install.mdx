@@ -1,24 +1,22 @@
 ---
 title: 'Installation'
-description: 'Install the Supermodel CLI on macOS, Linux, or Windows'
+description: 'Install the Supermodel CLI'
 icon: 'download'
 ---
 
-The CLI is a single Go binary with no runtime dependencies. After install, the `setup` wizard authenticates you and (optionally) installs the Claude Code hook for live updates.
+A single Go binary, no runtime dependencies.
 
-## macOS (Homebrew)
+## Homebrew
 
 ```bash
 brew install supermodeltools/tap/supermodel
 ```
 
-## Linux & macOS (curl)
+## curl
 
 ```bash
 curl -fsSL https://supermodeltools.com/install.sh | sh
 ```
-
-When attached to a terminal, the install script runs `supermodel setup` automatically on first install.
 
 ## npm
 
@@ -34,53 +32,17 @@ cd cli
 go build -o supermodel .
 ```
 
-Requires Go 1.22+.
-
-## First-time setup
-
-After install, run the interactive wizard. It authenticates your account, picks an output mode, and offers to install the Claude Code hook for live graph updates.
-
-```bash
-supermodel setup
-```
-
-<Tip>
-  In CI or other non-interactive environments, set `SUPERMODEL_API_KEY` instead of running `setup`. See [Configuration](/cli/configuration).
-</Tip>
-
-## Verify the install
-
-```bash
-supermodel version
-supermodel status
-```
-
-`status` prints your authentication state and cache location.
-
 ## Update
 
-The CLI can self-update from the latest GitHub release:
-
 ```bash
-supermodel update            # download and install
+supermodel update            # install latest release
 supermodel update --check    # check without installing
-```
-
-You can also re-run your original install method — Homebrew and the curl script both detect existing installs and upgrade in place.
-
-```bash
-brew upgrade supermodel
-# or
-curl -fsSL https://supermodeltools.com/install.sh | sh
 ```
 
 ## Uninstall
 
 ```bash
-# remove the binary
-brew uninstall supermodel       # or delete it from your PATH
-
-# remove credentials and cache
 supermodel logout
 rm -rf ~/.supermodel
+brew uninstall supermodel    # or remove the binary from your PATH
 ```
