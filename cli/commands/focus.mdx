@@ -1,0 +1,38 @@
+---
+title: 'focus'
+description: 'Token-efficient graph slice for a single file'
+---
+
+Extracts the minimal graph context relevant to the given file: direct imports, functions defined, callers, and (optionally) type declarations.
+
+Output is structured markdown for direct injection into LLM context windows, keeping token usage minimal while preserving semantic relevance. Use `--output json` for structured consumption by tools.
+
+**Aliases:** `ctx`, `context`
+
+## Synopsis
+
+```bash
+supermodel focus <file> [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--depth` | Import traversal depth (default `1`) |
+| `--types` | Include type/class declarations |
+| `--force` | Re-analyze even if cache is fresh |
+| `-o, --output` | Output format: `markdown` \| `json` (default `markdown`) |
+| `-h, --help` | Help for focus |
+
+## Examples
+
+```bash
+supermodel focus internal/api/client.go
+
+# Walk imports two hops deep, include types
+supermodel focus internal/api/client.go --depth 2 --types
+
+# JSON for tool consumption
+supermodel focus internal/api/client.go -o json
+```

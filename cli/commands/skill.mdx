@@ -1,0 +1,26 @@
+---
+title: 'skill'
+description: 'Print agent awareness prompt for graph files'
+---
+
+Prints a prompt that teaches AI coding agents how to use Supermodel's `.graph.*` sidecar files. Pipe into your agent's instructions file.
+
+## Synopsis
+
+```bash
+supermodel skill
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `-h, --help` | Help for skill |
+
+## Examples
+
+```bash
+supermodel skill >> CLAUDE.md
+supermodel skill >> AGENTS.md
+supermodel skill >> .cursorrules
+```

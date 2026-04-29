@@ -1,0 +1,54 @@
+---
+title: 'Quickstart'
+description: 'Authenticate and run your first analysis'
+icon: 'bolt'
+---
+
+## 1. Authenticate
+
+```bash
+supermodel login
+```
+
+Opens your browser, creates an API key, and saves it to `~/.supermodel/config.yaml`. For CI, pass the key directly:
+
+```bash
+supermodel login --token smsk_live_...
+```
+
+## 2. Analyze a repo
+
+```bash
+cd /path/to/your/repo
+supermodel analyze
+```
+
+Uploads the repo, runs call graph + dependency + domain analysis, caches the result locally by content hash, and writes `.graph.*` sidecar files next to each source file.
+
+## 3. Use the results
+
+| Goal | Command |
+|---|---|
+| Find unreachable functions | `supermodel dead-code` |
+| See what a change impacts | `supermodel blast-radius path/to/file.go` |
+| Codebase health report | `supermodel audit` |
+| Find usages of a symbol | `supermodel find handleRequest` |
+| Token-efficient context for one file | `supermodel focus path/to/file.go` |
+| Print the full graph | `supermodel graph` |
+
+Subsequent commands reuse the cached graph automatically. Pass `--force` to any command to bypass the cache.
+
+## 4. Configure (optional)
+
+Settings live at `~/.supermodel/config.yaml`. Environment variables override file values.
+
+```yaml
+api_key: smsk_live_...                       # or SUPERMODEL_API_KEY
+api_base: https://api.supermodeltools.com    # or SUPERMODEL_API_BASE
+output: human                                # human | json
+files: true                                  # set false (or SUPERMODEL_FILES=false) to skip writing sidecars
+```
+
+## Next
+
+See the [command reference](/cli/commands/analyze) for every command, flag, and example.

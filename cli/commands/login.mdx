@@ -1,0 +1,31 @@
+---
+title: 'login'
+description: 'Authenticate with your Supermodel account'
+---
+
+Opens your browser to create an API key and automatically saves it to `~/.supermodel/config.yaml`.
+
+For CI or headless environments, pass the key directly with `--token`.
+
+## Synopsis
+
+```bash
+supermodel login [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--token` | API key for non-interactive login (CI) |
+| `-h, --help` | Help for login |
+
+## Examples
+
+```bash
+# Browser-based login
+supermodel login
+
+# Non-interactive (CI)
+supermodel login --token smsk_live_...
+```

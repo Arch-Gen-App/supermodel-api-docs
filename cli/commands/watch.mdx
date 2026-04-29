@@ -1,0 +1,44 @@
+---
+title: 'supermodel'
+description: 'Run the watch daemon (the bare command)'
+---
+
+Runs a full analysis on startup (using the cached graph if available), then enters daemon mode. Listens for file-change notifications from the `supermodel hook` command and incrementally re-renders affected `.graph.*` sidecar files. Press Ctrl+C to stop and remove graph files.
+
+## Synopsis
+
+```bash
+supermodel [flags]
+```
+
+## Description
+
+The bare `supermodel` command is the watch daemon. It does not take a subcommand — running it with no arguments starts the long-running process.
+
+By default the daemon listens on UDP (port `7734`) for change notifications pushed by `supermodel hook`. For environments without a hook integration, pass `--fs-watch` to also poll git state (`HEAD`, index mtime, dirty files) every `--poll-interval`.
+
+## Flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `--dir` | `.` | Project directory |
+| `--cache-file` | — | Override cache file path |
+| `--debounce` | `2s` | Debounce duration before processing changes |
+| `--notify-port` | `7734` | UDP port for hook notifications |
+| `--fs-watch` | off | Also poll git state (use when no hook is installed) |
+| `--poll-interval` | `3s` | Git poll interval (only when `--fs-watch` is set) |
+| `-v, --version` | — | Print version and exit |
+| `-h, --help` | — | Help for supermodel |
+
+## Examples
+
+```bash
+# Start the daemon in the current directory
+supermodel
+
+# Watch a specific project, poll git state as a fallback
+supermodel --dir ./my-project --fs-watch
+
+# Use a custom UDP port if 7734 is taken
+supermodel --notify-port 9000
+```

@@ -1,0 +1,36 @@
+---
+title: 'hook'
+description: 'Forward Claude Code file-change events to the watch daemon'
+---
+
+Reads a Claude Code `PostToolUse` JSON payload from stdin and forwards the file path to the running watch daemon via UDP. Install as a `PostToolUse` hook in `.claude/settings.json`.
+
+## Synopsis
+
+```bash
+supermodel hook [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--port` | UDP port of the watch daemon (default `7734`) |
+| `-h, --help` | Help for hook |
+
+## Example
+
+Add to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{ "type": "command", "command": "supermodel hook" }]
+    }]
+  }
+}
+```
+
+The `supermodel setup` wizard installs this automatically when Claude Code is detected.

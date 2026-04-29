@@ -1,0 +1,39 @@
+---
+title: 'compact'
+description: 'Reduce token usage of source code while preserving semantics'
+---
+
+Strips comments, removes blank lines, and shortens local identifiers to produce token-efficient source code that remains syntactically valid and semantically identical (all tests still pass).
+
+Supports Go, Python, TypeScript, JavaScript, and Rust.
+
+For a single file, compacted output is written to stdout. For a directory, files are written to `--output` (default: `./compacted/`).
+
+**Aliases:** `pack`, `minify`
+
+## Synopsis
+
+```bash
+supermodel compact [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `-o, --output` | Output directory for directory mode (default `compacted`) |
+| `--dry-run` | Print stats without writing files |
+| `-h, --help` | Help for compact |
+
+## Examples
+
+```bash
+# Single file → stdout
+supermodel compact internal/api/client.go
+
+# Whole repo → ./compacted/
+supermodel compact .
+
+# See savings without writing
+supermodel compact --dry-run .
+```

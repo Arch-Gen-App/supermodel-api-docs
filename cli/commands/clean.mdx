@@ -1,0 +1,27 @@
+---
+title: 'clean'
+description: 'Remove all .graph.* files from the repository'
+---
+
+Removes every `.graph.*` sidecar file from the repository.
+
+## Synopsis
+
+```bash
+supermodel clean [path] [flags]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--dry-run` | Show what would be removed without removing |
+| `-h, --help` | Help for clean |
+
+## Examples
+
+```bash
+supermodel clean
+supermodel clean --dry-run
+supermodel clean ./my-project
+```

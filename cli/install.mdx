@@ -1,0 +1,48 @@
+---
+title: 'Installation'
+description: 'Install the Supermodel CLI'
+icon: 'download'
+---
+
+A single Go binary, no runtime dependencies.
+
+## Homebrew
+
+```bash
+brew install supermodeltools/tap/supermodel
+```
+
+## curl
+
+```bash
+curl -fsSL https://supermodeltools.com/install.sh | sh
+```
+
+## npm
+
+```bash
+npm install -g @supermodeltools/cli
+```
+
+## From source
+
+```bash
+git clone https://github.com/supermodeltools/cli
+cd cli
+go build -o supermodel .
+```
+
+## Update
+
+```bash
+supermodel update            # install latest release
+supermodel update --check    # check without installing
+```
+
+## Uninstall
+
+```bash
+supermodel logout
+rm -rf ~/.supermodel
+brew uninstall supermodel    # or remove the binary from your PATH
+```

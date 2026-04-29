@@ -43,6 +43,45 @@
         ]
       },
       {
+        "tab": "CLI",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "cli/install",
+              "cli/quickstart"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/commands/watch",
+              "cli/commands/analyze",
+              "cli/commands/audit",
+              "cli/commands/blast-radius",
+              "cli/commands/clean",
+              "cli/commands/compact",
+              "cli/commands/dead-code",
+              "cli/commands/docs",
+              "cli/commands/find",
+              "cli/commands/focus",
+              "cli/commands/graph",
+              "cli/commands/hook",
+              "cli/commands/login",
+              "cli/commands/logout",
+              "cli/commands/mcp",
+              "cli/commands/restore",
+              "cli/commands/setup",
+              "cli/commands/share",
+              "cli/commands/skill",
+              "cli/commands/status",
+              "cli/commands/update",
+              "cli/commands/version"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "openapi": "/openapi.yaml"
       }
